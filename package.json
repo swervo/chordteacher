@@ -9,16 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "next": "^16.2.4",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.35"
+    "tonal": "^6.4.3",
+    "tone": "^15.1.22"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@types/css-modules": "^1.0.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "postcss": "^8",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "typescript": "^6.0.3"
   }
 }

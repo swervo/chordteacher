@@ -1,0 +1,11 @@
+[
+  { "id": "g6-grade4",    "name": "G6",    "root": "G", "quality": "6",   "grade": 4, "syllabus": "LCM", "tab": "3-2-0-0-0-0" },
+  { "id": "a6-grade4",    "name": "A6",    "root": "A", "quality": "6",   "grade": 4, "syllabus": "LCM", "tab": "x-0-2-2-2-2" },
+  { "id": "d6-grade4",    "name": "D6",    "root": "D", "quality": "6",   "grade": 4, "syllabus": "LCM", "tab": "x-x-0-2-0-2" },
+  { "id": "e6-grade4",    "name": "E6",    "root": "E", "quality": "6",   "grade": 4, "syllabus": "LCM", "tab": "0-2-2-1-2-0" },
+  { "id": "gadd9-grade4", "name": "Gadd9", "root": "G", "quality": "add9","grade": 4, "syllabus": "LCM", "tab": "3-x-0-2-0-3" },
+  { "id": "aadd9-grade4", "name": "Aadd9", "root": "A", "quality": "add9","grade": 4, "syllabus": "LCM", "tab": "x-0-2-4-2-0" },
+  { "id": "eadd9-grade4", "name": "Eadd9", "root": "E", "quality": "add9","grade": 4, "syllabus": "LCM", "tab": "0-2-2-1-0-2" },
+  { "id": "cadd9-grade4", "name": "Cadd9", "root": "C", "quality": "add9","grade": 4, "syllabus": "LCM", "tab": "x-3-2-0-3-0" },
+  { "id": "fadd9-grade4", "name": "Fadd9", "root": "F", "quality": "add9","grade": 4, "syllabus": "LCM", "tab": "x-x-3-2-1-3" }
+]

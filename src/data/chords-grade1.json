@@ -1,0 +1,8 @@
+[
+  { "id": "a-grade1",  "name": "A",  "root": "A", "quality": "M",  "grade": 1, "syllabus": "LCM", "tab": "x-0-2-2-2-0" },
+  { "id": "e-grade1",  "name": "E",  "root": "E", "quality": "M",  "grade": 1, "syllabus": "LCM", "tab": "0-2-2-1-0-0" },
+  { "id": "d7-grade1", "name": "D7", "root": "D", "quality": "7",  "grade": 1, "syllabus": "LCM", "tab": "x-x-0-2-1-2" },
+  { "id": "a7-grade1", "name": "A7", "root": "A", "quality": "7",  "grade": 1, "syllabus": "LCM", "tab": "x-0-2-0-2-0" },
+  { "id": "e7-grade1", "name": "E7", "root": "E", "quality": "7",  "grade": 1, "syllabus": "LCM", "tab": "0-2-0-1-0-0" },
+  { "id": "b7-grade1", "name": "B7", "root": "B", "quality": "7",  "grade": 1, "syllabus": "LCM", "tab": "x-2-1-2-0-2" }
+]
