@@ -171,7 +171,7 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
   const placedNotes = activePlacedNotes(state.stringStates);
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto p-4">
+    <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto p-3">
       <AudioEngine
         onReady={(strum, pluck, mute) => {
           strumChordFn = strum;
@@ -189,33 +189,38 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
       </div>
 
       <div className="text-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">{strings.quiz.instruction}</p>
-        <h1 className="text-5xl font-bold text-gray-900 dark:text-white tracking-tight">{chord.name}</h1>
+        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest">{strings.quiz.instruction}</p>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">{chord.name}</h1>
       </div>
 
 
-      <div className="relative w-full">
-        <Fretboard
-          chord={chord}
-          stringStates={state.stringStates}
-          onFretClick={handleFretClick}
-          onToggleOpenMute={handleToggleOpenMute}
-        />
-        {state.phase === "success" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl bg-white/50 dark:bg-gray-900/60 backdrop-blur-sm">
-            <span className="text-5xl">✓</span>
-            <span className="text-2xl font-bold text-green-700 dark:text-green-300">{strings.quiz.correct}</span>
-            <button
-              onClick={() => dispatch({ type: "NEXT_CHORD" })}
-              className="px-6 py-2 bg-green-600 hover:bg-green-500 dark:bg-green-700 dark:hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
-            >
-              {strings.quiz.next}
-            </button>
-          </div>
-        )}
+      {/* Neck-width container — fretboard and theory panel share the same max-w-sm */}
+      <div className="w-full max-w-sm mx-auto flex flex-col gap-6">
+        <div className="relative">
+          <Fretboard
+            chord={chord}
+            stringStates={state.stringStates}
+            onFretClick={handleFretClick}
+            onToggleOpenMute={handleToggleOpenMute}
+          />
+          {state.phase === "success" && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl bg-white/50 dark:bg-gray-900/60 backdrop-blur-sm">
+              <span className="text-5xl">✓</span>
+              <span className="text-2xl font-bold text-green-700 dark:text-green-300">{strings.quiz.correct}</span>
+              <button
+                onClick={() => dispatch({ type: "NEXT_CHORD" })}
+                className="px-6 py-2 bg-green-600 hover:bg-green-500 dark:bg-green-700 dark:hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+              >
+                {strings.quiz.next}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <TheoryPanel chord={chord} placedNotes={placedNotes} />
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         <button
           onClick={handleHear}
           className="px-5 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors"
@@ -235,8 +240,6 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
           {strings.quiz.skip}
         </button>
       </div>
-
-      <TheoryPanel chord={chord} placedNotes={placedNotes} />
     </div>
   );
 }

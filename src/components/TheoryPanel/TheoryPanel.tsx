@@ -3,6 +3,7 @@
 import type { ChordDefinition, PlacedNote, StringNumber } from "@/types/chord";
 import { getChordNotes, getParentScaleNotes } from "@/lib/theory";
 import { strings } from "@/lib/strings";
+import NoteCircle from "@/components/NoteCircle";
 
 const NOTE_MIDI: Record<string, number> = {
   C: 60, "C#": 61, Db: 61, D: 62, "D#": 63, Eb: 63,
@@ -20,16 +21,16 @@ const SEMITONE_TO_LABEL: Record<number, string> = {
   0: "R", 2: "2", 3: "m3", 4: "3", 5: "4", 7: "5", 9: "6", 10: "7", 11: "maj7",
 };
 
-const INTERVAL_COLORS: Record<string, string> = {
-  R:      "bg-red-500",
-  "3":    "bg-blue-500",
-  "m3":   "bg-violet-500",
-  "5":    "bg-green-500",
-  "maj7": "bg-purple-500",
-  "7":    "bg-orange-500",
-  "2":    "bg-amber-500",
-  "4":    "bg-amber-500",
-  "6":    "bg-amber-500",
+const INTERVAL_COLORS_HEX: Record<string, string> = {
+  R:      "#ef4444",
+  "3":    "#3b82f6",
+  "m3":   "#8b5cf6",
+  "5":    "#22c55e",
+  "maj7": "#a855f7",
+  "7":    "#f97316",
+  "2":    "#f59e0b",
+  "4":    "#f59e0b",
+  "6":    "#f59e0b",
 };
 
 function semitoneLabel(root: string, note: string): string {
@@ -66,34 +67,29 @@ export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
   const isAdd9 = chord.quality.includes("add9") || chord.quality === "9";
 
   return (
-    <div className="mt-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-transparent rounded-xl w-full">
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-wide">
+    <div className="mt-0 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-transparent rounded-xl w-full">
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
         {chord.root} {chord.quality.includes("m") && !chord.quality.includes("maj") ? strings.theory.naturalMinor : strings.theory.major} {strings.theory.scale}
       </p>
-      <div className="flex gap-2 flex-wrap justify-center">
+      <div className="flex gap-1 justify-between">
         {scaleNotes.map((note) => {
           const label = semitoneLabel(chord.root, note);
           const isInChord = chordNoteSet.has(note);
           const isChecked = checkedPitchClasses.has(note);
-          const colorClass = isInChord ? (INTERVAL_COLORS[label] ?? "bg-gray-500") : "bg-gray-200 dark:bg-gray-700";
           const opacityClass = isInChord ? "" : "opacity-30";
           const show9 = isAdd9 && label === "2";
 
           return (
-            <div key={note} className={`flex flex-col items-center gap-1 transition-opacity ${opacityClass}`}>
-              <div className="relative">
-                <span className={`w-11 h-11 flex items-center justify-center rounded-full text-sm font-bold text-white ${colorClass}`}>
-                  {note}
-                </span>
-                {show9 && (
-                  <span className="absolute -top-1 -right-1 bg-gray-900 text-amber-400 text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-amber-400">
-                    9
-                  </span>
-                )}
-              </div>
-              <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
-              <span className={`text-xs font-bold transition-all ${isChecked ? "text-green-500 dark:text-green-400" : "text-transparent"}`}>✓</span>
-            </div>
+            <NoteCircle
+              key={note}
+              label={note}
+              bgColor={isInChord ? (INTERVAL_COLORS_HEX[label] ?? "#6b7280") : undefined}
+              borderColor={isInChord ? undefined : undefined}
+              dim={!isInChord}
+              badge={show9 ? "9" : undefined}
+              sublabel={label}
+              checked={isChecked}
+            />
           );
         })}
       </div>
