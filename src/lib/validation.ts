@@ -26,7 +26,7 @@ export function validateAnswer(
     const canonicalFret = f.fret; // null = muted, 0 = open, N = fretted
 
     if (student.kind === "fret") anyInteraction = true;
-    if (student.kind === "muted" && !f.muted) anyInteraction = true;
+    if (student.kind === "muted") anyInteraction = true;
 
     if (f.muted) {
       // This string must be muted
@@ -36,8 +36,9 @@ export function validateAnswer(
     } else if (canonicalFret === 0) {
       // This string must be open
       if (student.kind === "muted") { anyIncorrect = true; continue; }
-      if (student.kind === "fret") { anyIncorrect = true; continue; }
-      // kind === "open" → correct for this string
+      if (student.kind === "open") { anyIncomplete = true; continue; }
+      if (student.kind === "fret" && student.fret !== 0) { anyIncorrect = true; continue; }
+      // fret:0 or open → correct for this string
     } else {
       // This string must be fretted at canonicalFret
       if (student.kind === "muted") { anyIncorrect = true; continue; }

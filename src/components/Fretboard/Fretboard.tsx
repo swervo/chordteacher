@@ -9,8 +9,9 @@ const STRINGS_LR: StringNumber[] = [6, 5, 4, 3, 2, 1];
 const STRING_W = 52;
 const FRET_H = 56;
 const PAD_H = 32;
-const NUT_Y = 72;
+const NUT_Y = 80;  // extra space for full-size dots above nut
 const PAD_B = 24;
+const DOT_R = 15;  // single radius used everywhere
 
 const WIDTH = PAD_H * 2 + (STRINGS_LR.length - 1) * STRING_W;
 const HEIGHT = NUT_Y + NUM_FRETS * FRET_H + PAD_B;
@@ -23,17 +24,10 @@ const STRING_LABELS: Record<StringNumber, string> = {
   6: "E", 5: "A", 4: "D", 3: "G", 2: "B", 1: "e",
 };
 
-// Semitone offsets from open string to compute interval vs root
 const OPEN_MIDI: Record<StringNumber, number> = {
-  6: 40, // E2
-  5: 45, // A2
-  4: 50, // D3
-  3: 55, // G3
-  2: 59, // B3
-  1: 64, // E4
+  6: 40, 5: 45, 4: 50, 3: 55, 2: 59, 1: 64,
 };
 
-// Root note name → midi value (octave 4, just for semitone comparison)
 const NOTE_MIDI: Record<string, number> = {
   C: 60, "C#": 61, Db: 61, D: 62, "D#": 63, Eb: 63,
   E: 64, F: 65, "F#": 66, Gb: 66, G: 67, "G#": 68,
@@ -42,17 +36,16 @@ const NOTE_MIDI: Record<string, number> = {
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
-// Interval colours keyed by semitone distance from root (for dot background)
 const SEMITONE_COLORS: Record<number, string> = {
-  0:  "#ef4444", // R
-  4:  "#3b82f6", // maj 3
-  3:  "#8b5cf6", // min 3
-  7:  "#22c55e", // 5
-  11: "#a855f7", // maj7
-  10: "#f97316", // b7
-  2:  "#f59e0b", // 2 / 9
-  5:  "#f59e0b", // 4
-  9:  "#f59e0b", // 6
+  0:  "#ef4444",
+  4:  "#3b82f6",
+  3:  "#8b5cf6",
+  7:  "#22c55e",
+  11: "#a855f7",
+  10: "#f97316",
+  2:  "#f59e0b",
+  5:  "#f59e0b",
+  9:  "#f59e0b",
 };
 
 function noteNameAtFret(string: StringNumber, fret: number): string {
@@ -72,6 +65,26 @@ function stringX(s: StringNumber): number {
 
 function fretMidY(fret: number): number {
   return NUT_Y + (fret - 0.5) * FRET_H;
+}
+
+// Shared note dot — used above nut (open strings) and on frets
+function NoteCircle({ cx, cy, fill, label, onClick }: {
+  cx: number; cy: number; fill: string; label: string;
+  onClick?: () => void;
+}) {
+  const fontSize = label.length > 2 ? 8 : label.length > 1 ? 9 : 11;
+  return (
+    <g onClick={onClick} className={onClick ? "cursor-pointer" : undefined}>
+      <circle cx={cx} cy={cy} r={DOT_R} fill={fill} />
+      <text
+        x={cx} y={cy + 4}
+        textAnchor="middle" fontSize={fontSize}
+        fill="white" fontWeight="bold" fontFamily="sans-serif"
+      >
+        {label}
+      </text>
+    </g>
+  );
 }
 
 interface FretboardProps {
@@ -108,11 +121,13 @@ export default function Fretboard({
     wrongFill:    "#fca5a5",
   };
 
-  // Build a lookup of which fret is canonical for each string
   const canonicalFret: Record<StringNumber, number | null> = {} as Record<StringNumber, number | null>;
   for (const f of chord.fingering) {
     canonicalFret[f.string as StringNumber] = f.muted ? null : (f.fret ?? 0);
   }
+
+  // Y position for the above-nut indicator row
+  const indicatorY = NUT_Y - DOT_R - 6;
 
   return (
     <div className="flex justify-center">
@@ -157,7 +172,7 @@ export default function Fretboard({
         {STRINGS_LR.map((s) => (
           <text
             key={`label-${s}`}
-            x={stringX(s)} y={NUT_Y - 50}
+            x={stringX(s)} y={NUT_Y - DOT_R * 2 - 12}
             textAnchor="middle" fontSize={12}
             fill={C.label} fontFamily="monospace"
           >
@@ -165,51 +180,40 @@ export default function Fretboard({
           </text>
         ))}
 
-        {/* ○ / × / coloured open-dot indicators above nut */}
+        {/* Above-nut indicators */}
         {STRINGS_LR.map((s) => {
           const state = stringStates[s];
           const x = stringX(s);
-          const y = NUT_Y - 26;
+          const y = indicatorY;
 
-          // If fret is placed, show a plain ○ above nut that clears it on click
-          if (state.kind === "fret") {
+          // Fretted note placed (fret > 0): dashed ○ — click to clear
+          if (state.kind === "fret" && state.fret > 0) {
             return (
               <g key={`ind-${s}`} className="cursor-pointer" onClick={() => onToggleOpenMute(s)}>
-                <circle cx={x} cy={y} r={8} fill="none" stroke={C.dashStroke} strokeWidth={1.5} strokeDasharray="3 2" />
-                <circle cx={x} cy={y} r={14} fill="transparent" />
+                <circle cx={x} cy={y} r={DOT_R} fill="none" stroke={C.dashStroke} strokeWidth={1.5} strokeDasharray="4 2" />
+                <circle cx={x} cy={y} r={DOT_R} fill="transparent" />
               </g>
             );
           }
 
+          // Muted: show ×
           if (state.kind === "muted") {
             return (
               <g key={`ind-${s}`} className="cursor-pointer" onClick={() => onToggleOpenMute(s)}>
+                <circle cx={x} cy={y} r={DOT_R} fill="none" stroke={C.label} strokeWidth={1.5} />
                 <text x={x} y={y + 5} textAnchor="middle" fontSize={16} fill={C.label} fontWeight="bold">×</text>
-                <rect x={x - 12} y={y - 12} width={24} height={24} fill="transparent" />
               </g>
             );
           }
 
-          // Open string — show note name if chord tone, plain ○ otherwise
-          const noteName = noteNameAtFret(s, 0);
-          const isChordTone = canonicalFret[s] === 0;
-          const fill = isChordTone ? colorForStringFret(chord.root, s, 0) : "none";
-          const stroke = isChordTone ? "none" : C.openStroke;
+          // Selected open (fret:0): rendered by the note dots section below — show nothing here
+          if (state.kind === "fret" && state.fret === 0) return null;
 
+          // Unselected open: plain ○
           return (
             <g key={`ind-${s}`} className="cursor-pointer" onClick={() => onToggleOpenMute(s)}>
-              <circle cx={x} cy={y} r={8} fill={fill} stroke={stroke} strokeWidth={1.5} />
-              {isChordTone && (
-                <text
-                  x={x} y={y + 3}
-                  textAnchor="middle"
-                  fontSize={noteName.length > 1 ? 7 : 9}
-                  fill="white" fontWeight="bold" fontFamily="sans-serif"
-                >
-                  {noteName}
-                </text>
-              )}
-              <circle cx={x} cy={y} r={14} fill="transparent" />
+              <circle cx={x} cy={y} r={DOT_R} fill="none" stroke={C.openStroke} strokeWidth={1.5} />
+              <circle cx={x} cy={y} r={DOT_R} fill="transparent" />
             </g>
           );
         })}
@@ -233,31 +237,24 @@ export default function Fretboard({
           })
         )}
 
-        {/* Fretted note dots */}
+        {/* Note dots — fretted (fret > 0) and selected open (fret === 0) */}
         {STRINGS_LR.map((s) => {
           const state = stringStates[s];
           if (state.kind !== "fret") return null;
 
           const x = stringX(s);
-          const y = fretMidY(state.fret);
-          const noteName = noteNameAtFret(s, state.fret);
+          const y = state.fret === 0 ? indicatorY : fretMidY(state.fret);
           const isCorrect = canonicalFret[s] === state.fret;
-          const fill = isCorrect
-            ? colorForStringFret(chord.root, s, state.fret)
-            : C.wrongFill;
-          const fontSize = noteName.length > 1 ? 9 : 11;
+          const fill = isCorrect ? colorForStringFret(chord.root, s, state.fret) : C.wrongFill;
+          const label = isCorrect ? noteNameAtFret(s, state.fret) : "✗";
 
           return (
-            <g key={`note-${s}`}>
-              <circle cx={x} cy={y} r={15} fill={fill} />
-              <text
-                x={x} y={y + 4}
-                textAnchor="middle" fontSize={fontSize}
-                fill="white" fontWeight="bold" fontFamily="sans-serif"
-              >
-                {isCorrect ? noteName : "✗"}
-              </text>
-            </g>
+            <NoteCircle
+              key={`note-${s}`}
+              cx={x} cy={y}
+              fill={fill} label={label}
+              onClick={state.fret === 0 ? () => onToggleOpenMute(s) : undefined}
+            />
           );
         })}
       </svg>

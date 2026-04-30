@@ -73,12 +73,17 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
     case "TOGGLE_OPEN_MUTE": {
       const current = state.stringStates[action.string];
       let next: StringState;
-      if (current.kind === "fret") {
-        next = { kind: "open" };       // clear fret → open
+      if (current.kind === "open") {
+        next = { kind: "fret", fret: 0 };  // unselected → selected open
+        // play the open string note
+        setTimeout(() => pluckNoteFn?.(action.string, 0), 0);
+      } else if (current.kind === "fret" && current.fret === 0) {
+        next = { kind: "muted" };           // selected open → muted
+        setTimeout(() => muteSoundFn?.(), 0);
       } else if (current.kind === "muted") {
-        next = { kind: "open" };       // unmute → open
+        next = { kind: "open" };            // muted → unselected
       } else {
-        next = { kind: "muted" };      // open → mute
+        next = { kind: "open" };            // fretted note → clear to unselected
       }
       const updated: StringStates = { ...state.stringStates, [action.string]: next };
       return { ...state, ...applyAndValidate(updated, chord, state.score) };
@@ -118,6 +123,7 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
 
 let strumChordFn: ((fingering: ChordDefinition["fingering"]) => Promise<void>) | null = null;
 let pluckNoteFn: ((string: StringNumber, fret: number) => Promise<void>) | null = null;
+let muteSoundFn: (() => void) | null = null;
 
 export default function QuizController({ grade }: { grade: GradeNumber }) {
   const [state, dispatch] = useReducer(reducer, null, () => ({
@@ -166,9 +172,10 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto p-4">
       <AudioEngine
-        onReady={(strum, pluck) => {
+        onReady={(strum, pluck, mute) => {
           strumChordFn = strum;
           pluckNoteFn = pluck;
+          muteSoundFn = mute;
         }}
       />
 
