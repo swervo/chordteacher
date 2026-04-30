@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChordDefinition, StringNumber, StringStates } from "@/types/chord";
+import { useTheme } from "@/lib/useTheme";
 
 const NUM_FRETS = 5;
 const STRINGS_LR: StringNumber[] = [6, 5, 4, 3, 2, 1];
@@ -83,6 +84,30 @@ interface FretboardProps {
 export default function Fretboard({
   chord, stringStates, onFretClick, onToggleOpenMute,
 }: FretboardProps) {
+  const { isDark } = useTheme();
+
+  const C = isDark ? {
+    nut:          "#e5e7eb",
+    fret:         "#4b5563",
+    marker:       "#374151",
+    string:       "#9ca3af",
+    stringMuted:  "#374151",
+    label:        "#6b7280",
+    openStroke:   "#6b7280",
+    dashStroke:   "#4b5563",
+    wrongFill:    "#7f1d1d",
+  } : {
+    nut:          "#1f2937",
+    fret:         "#d1d5db",
+    marker:       "#e5e7eb",
+    string:       "#6b7280",
+    stringMuted:  "#e5e7eb",
+    label:        "#9ca3af",
+    openStroke:   "#9ca3af",
+    dashStroke:   "#d1d5db",
+    wrongFill:    "#fca5a5",
+  };
+
   // Build a lookup of which fret is canonical for each string
   const canonicalFret: Record<StringNumber, number | null> = {} as Record<StringNumber, number | null>;
   for (const f of chord.fingering) {
@@ -102,7 +127,7 @@ export default function Fretboard({
             key={`fret-${i}`}
             x1={PAD_H} y1={NUT_Y + i * FRET_H}
             x2={PAD_H + (STRINGS_LR.length - 1) * STRING_W} y2={NUT_Y + i * FRET_H}
-            stroke={i === 0 ? "#e5e7eb" : "#4b5563"}
+            stroke={i === 0 ? C.nut : C.fret}
             strokeWidth={i === 0 ? 5 : 1}
           />
         ))}
@@ -113,7 +138,7 @@ export default function Fretboard({
             key={`marker-${fret}`}
             cx={WIDTH / 2}
             cy={NUT_Y + (fret - 0.5) * FRET_H}
-            r={4} fill="#374151"
+            r={4} fill={C.marker}
           />
         ))}
 
@@ -123,7 +148,7 @@ export default function Fretboard({
             key={`string-${s}`}
             x1={stringX(s)} y1={NUT_Y}
             x2={stringX(s)} y2={NUT_Y + NUM_FRETS * FRET_H}
-            stroke={stringStates[s].kind === "muted" ? "#374151" : "#9ca3af"}
+            stroke={stringStates[s].kind === "muted" ? C.stringMuted : C.string}
             strokeWidth={STRING_THICKNESS[s]}
           />
         ))}
@@ -134,7 +159,7 @@ export default function Fretboard({
             key={`label-${s}`}
             x={stringX(s)} y={NUT_Y - 50}
             textAnchor="middle" fontSize={12}
-            fill="#6b7280" fontFamily="monospace"
+            fill={C.label} fontFamily="monospace"
           >
             {STRING_LABELS[s]}
           </text>
@@ -150,7 +175,7 @@ export default function Fretboard({
           if (state.kind === "fret") {
             return (
               <g key={`ind-${s}`} className="cursor-pointer" onClick={() => onToggleOpenMute(s)}>
-                <circle cx={x} cy={y} r={8} fill="none" stroke="#4b5563" strokeWidth={1.5} strokeDasharray="3 2" />
+                <circle cx={x} cy={y} r={8} fill="none" stroke={C.dashStroke} strokeWidth={1.5} strokeDasharray="3 2" />
                 <circle cx={x} cy={y} r={14} fill="transparent" />
               </g>
             );
@@ -159,7 +184,7 @@ export default function Fretboard({
           if (state.kind === "muted") {
             return (
               <g key={`ind-${s}`} className="cursor-pointer" onClick={() => onToggleOpenMute(s)}>
-                <text x={x} y={y + 5} textAnchor="middle" fontSize={16} fill="#6b7280" fontWeight="bold">×</text>
+                <text x={x} y={y + 5} textAnchor="middle" fontSize={16} fill={C.label} fontWeight="bold">×</text>
                 <rect x={x - 12} y={y - 12} width={24} height={24} fill="transparent" />
               </g>
             );
@@ -169,7 +194,7 @@ export default function Fretboard({
           const noteName = noteNameAtFret(s, 0);
           const isChordTone = canonicalFret[s] === 0;
           const fill = isChordTone ? colorForStringFret(chord.root, s, 0) : "none";
-          const stroke = isChordTone ? "none" : "#6b7280";
+          const stroke = isChordTone ? "none" : C.openStroke;
 
           return (
             <g key={`ind-${s}`} className="cursor-pointer" onClick={() => onToggleOpenMute(s)}>
@@ -219,7 +244,7 @@ export default function Fretboard({
           const isCorrect = canonicalFret[s] === state.fret;
           const fill = isCorrect
             ? colorForStringFret(chord.root, s, state.fret)
-            : "#7f1d1d";
+            : C.wrongFill;
           const fontSize = noteName.length > 1 ? 9 : 11;
 
           return (

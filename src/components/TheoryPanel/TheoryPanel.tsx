@@ -65,8 +65,8 @@ export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
   const isAdd9 = chord.quality.includes("add9") || chord.quality === "9";
 
   return (
-    <div className="mt-2 p-4 bg-gray-800 rounded-xl w-full">
-      <p className="text-xs text-gray-400 mb-4 uppercase tracking-wide">
+    <div className="mt-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-transparent rounded-xl w-full">
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-wide">
         {chord.root} {chord.quality.includes("m") && !chord.quality.includes("maj") ? "natural minor" : "major"} scale
       </p>
       <div className="flex gap-2 flex-wrap justify-center">
@@ -74,7 +74,7 @@ export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
           const label = semitoneLabel(chord.root, note);
           const isInChord = chordNoteSet.has(note);
           const isChecked = checkedPitchClasses.has(note);
-          const colorClass = isInChord ? (INTERVAL_COLORS[label] ?? "bg-gray-500") : "bg-gray-700";
+          const colorClass = isInChord ? (INTERVAL_COLORS[label] ?? "bg-gray-500") : "bg-gray-200 dark:bg-gray-700";
           const opacityClass = isInChord ? "" : "opacity-30";
           const show9 = isAdd9 && label === "2";
 
@@ -90,8 +90,8 @@ export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
                   </span>
                 )}
               </div>
-              <span className="text-xs text-gray-400">{label}</span>
-              <span className={`text-xs font-bold transition-all ${isChecked ? "text-green-400" : "text-transparent"}`}>✓</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
+              <span className={`text-xs font-bold transition-all ${isChecked ? "text-green-500 dark:text-green-400" : "text-transparent"}`}>✓</span>
             </div>
           );
         })}
