@@ -15,7 +15,6 @@ export const strings = {
     instruction: "Play this chord",
     correct: "Correct!",
     next: "Next →",
-    incorrect: "Wrong note — try adjusting",
     hearChord: "♪ Hear chord",
     clear: "Clear",
     skip: "Skip",

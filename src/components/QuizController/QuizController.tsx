@@ -193,28 +193,27 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
         <h1 className="text-5xl font-bold text-gray-900 dark:text-white tracking-tight">{chord.name}</h1>
       </div>
 
-      {state.phase === "success" && (
-        <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-xl px-6 py-3">
-          <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
-          <span className="text-green-700 dark:text-green-300 font-medium">{strings.quiz.correct}</span>
-          <button
-            onClick={() => dispatch({ type: "NEXT_CHORD" })}
-            className="ml-4 px-4 py-1.5 bg-green-600 dark:bg-green-700 hover:bg-green-500 dark:hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors"
-          >
-            {strings.quiz.next}
-          </button>
-        </div>
-      )}
-      {state.validationResult === "incorrect" && state.phase !== "success" && (
-        <div className="text-amber-600 dark:text-amber-400 text-sm">{strings.quiz.incorrect}</div>
-      )}
 
-      <Fretboard
-        chord={chord}
-        stringStates={state.stringStates}
-        onFretClick={handleFretClick}
-        onToggleOpenMute={handleToggleOpenMute}
-      />
+      <div className="relative w-full">
+        <Fretboard
+          chord={chord}
+          stringStates={state.stringStates}
+          onFretClick={handleFretClick}
+          onToggleOpenMute={handleToggleOpenMute}
+        />
+        {state.phase === "success" && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl bg-white/50 dark:bg-gray-900/60 backdrop-blur-sm">
+            <span className="text-5xl">✓</span>
+            <span className="text-2xl font-bold text-green-700 dark:text-green-300">{strings.quiz.correct}</span>
+            <button
+              onClick={() => dispatch({ type: "NEXT_CHORD" })}
+              className="px-6 py-2 bg-green-600 hover:bg-green-500 dark:bg-green-700 dark:hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+            >
+              {strings.quiz.next}
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="flex gap-3">
         <button
