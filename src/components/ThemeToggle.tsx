@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "@/lib/useTheme";
+import { strings } from "@/lib/strings";
 
 export default function ThemeToggle() {
   const { isDark, toggle } = useTheme();
@@ -8,7 +9,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      aria-label="Toggle light/dark mode"
+      aria-label={strings.theme.toggleAriaLabel}
       className="p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
     >
       {isDark ? (

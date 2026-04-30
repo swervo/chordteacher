@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { GradeNumber } from "@/types/chord";
 import QuizControllerClient from "@/components/QuizController/QuizControllerClient";
 import ThemeToggle from "@/components/ThemeToggle";
+import { strings } from "@/lib/strings";
 
 interface Props {
   params: Promise<{ grade: string }>;
@@ -17,7 +18,7 @@ export default async function QuizPage({ params }: Props) {
       <div className="max-w-2xl mx-auto px-4">
         <div className="mb-6 flex items-center justify-between">
           <a href="/" className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-sm transition-colors">
-            ← Back to grades
+            {strings.quiz.backToGrades}
           </a>
           <ThemeToggle />
         </div>

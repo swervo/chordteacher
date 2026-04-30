@@ -7,6 +7,7 @@ import type {
   StringStates, ValidationResult,
 } from "@/types/chord";
 import { getChordsForGrade, shuffleChords } from "@/data/index";
+import { strings } from "@/lib/strings";
 import { validateAnswer, activePlacedNotes } from "@/lib/validation";
 import Fretboard from "@/components/Fretboard/Fretboard";
 import TheoryPanel from "@/components/TheoryPanel/TheoryPanel";
@@ -180,35 +181,32 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
       />
 
       <div className="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
-        <span>Grade {state.grade}</span>
+        <span>{strings.quiz.grade} {state.grade}</span>
         <span>·</span>
-        <span>{state.score.correct} correct</span>
+        <span>{state.score.correct} {strings.quiz.correctCount}</span>
         <span>·</span>
-        <span>{state.chordQueue.length - state.currentIndex} remaining</span>
+        <span>{state.chordQueue.length - state.currentIndex} {strings.quiz.remaining}</span>
       </div>
 
       <div className="text-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Play this chord</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">{strings.quiz.instruction}</p>
         <h1 className="text-5xl font-bold text-gray-900 dark:text-white tracking-tight">{chord.name}</h1>
-        {!chord.verified && (
-          <p className="text-xs text-amber-500 dark:text-amber-400 mt-1">⚠ Verify fingering against your syllabus</p>
-        )}
       </div>
 
       {state.phase === "success" && (
         <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-xl px-6 py-3">
           <span className="text-green-600 dark:text-green-400 text-xl">✓</span>
-          <span className="text-green-700 dark:text-green-300 font-medium">Correct!</span>
+          <span className="text-green-700 dark:text-green-300 font-medium">{strings.quiz.correct}</span>
           <button
             onClick={() => dispatch({ type: "NEXT_CHORD" })}
             className="ml-4 px-4 py-1.5 bg-green-600 dark:bg-green-700 hover:bg-green-500 dark:hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors"
           >
-            Next →
+            {strings.quiz.next}
           </button>
         </div>
       )}
       {state.validationResult === "incorrect" && state.phase !== "success" && (
-        <div className="text-amber-600 dark:text-amber-400 text-sm">Wrong note — try adjusting</div>
+        <div className="text-amber-600 dark:text-amber-400 text-sm">{strings.quiz.incorrect}</div>
       )}
 
       <Fretboard
@@ -223,19 +221,19 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
           onClick={handleHear}
           className="px-5 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors"
         >
-          ♪ Hear chord
+          {strings.quiz.hearChord}
         </button>
         <button
           onClick={() => dispatch({ type: "CLEAR" })}
           className="px-5 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg text-sm transition-colors"
         >
-          Clear
+          {strings.quiz.clear}
         </button>
         <button
           onClick={() => dispatch({ type: "NEXT_CHORD" })}
           className="px-5 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg text-sm transition-colors"
         >
-          Skip
+          {strings.quiz.skip}
         </button>
       </div>
 

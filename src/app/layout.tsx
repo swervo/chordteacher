@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
+import { strings } from "@/lib/strings";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -15,8 +16,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ChordTeacher",
-  description: "LCM Acoustic Guitar interactive chord quiz",
+  title: strings.app.title,
+  description: strings.app.metaDescription,
 };
 
 export default function RootLayout({

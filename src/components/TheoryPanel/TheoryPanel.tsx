@@ -2,6 +2,7 @@
 
 import type { ChordDefinition, PlacedNote, StringNumber } from "@/types/chord";
 import { getChordNotes, getParentScaleNotes } from "@/lib/theory";
+import { strings } from "@/lib/strings";
 
 const NOTE_MIDI: Record<string, number> = {
   C: 60, "C#": 61, Db: 61, D: 62, "D#": 63, Eb: 63,
@@ -67,7 +68,7 @@ export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
   return (
     <div className="mt-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-transparent rounded-xl w-full">
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-wide">
-        {chord.root} {chord.quality.includes("m") && !chord.quality.includes("maj") ? "natural minor" : "major"} scale
+        {chord.root} {chord.quality.includes("m") && !chord.quality.includes("maj") ? strings.theory.naturalMinor : strings.theory.major} {strings.theory.scale}
       </p>
       <div className="flex gap-2 flex-wrap justify-center">
         {scaleNotes.map((note) => {
