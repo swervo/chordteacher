@@ -39,30 +39,30 @@ const NOTE_MIDI: Record<string, number> = {
   Ab: 68, A: 69, "A#": 70, Bb: 70, B: 71,
 };
 
-const SEMITONE_TO_INTERVAL: Record<number, string> = {
-  0: "R", 2: "2", 3: "m3", 4: "3", 5: "4",
-  7: "5", 9: "6", 10: "7", 11: "maj7",
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+// Interval colours keyed by semitone distance from root (for dot background)
+const SEMITONE_COLORS: Record<number, string> = {
+  0:  "#ef4444", // R
+  4:  "#3b82f6", // maj 3
+  3:  "#8b5cf6", // min 3
+  7:  "#22c55e", // 5
+  11: "#a855f7", // maj7
+  10: "#f97316", // b7
+  2:  "#f59e0b", // 2 / 9
+  5:  "#f59e0b", // 4
+  9:  "#f59e0b", // 6
 };
 
-const INTERVAL_COLORS: Record<string, string> = {
-  R:      "#ef4444",
-  "3":    "#3b82f6",
-  "m3":   "#8b5cf6",
-  "5":    "#22c55e",
-  "maj7": "#a855f7",
-  "7":    "#f97316",
-  "2":    "#f59e0b",
-  "4":    "#f59e0b",
-  "6":    "#f59e0b",
-  "9":    "#f59e0b",
-};
+function noteNameAtFret(string: StringNumber, fret: number): string {
+  return NOTE_NAMES[(OPEN_MIDI[string] + fret) % 12];
+}
 
-function intervalForStringFret(root: string, string: StringNumber, fret: number): string {
-  const noteMidi = OPEN_MIDI[string] + fret;
+function colorForStringFret(root: string, string: StringNumber, fret: number): string {
   const rootMidi = NOTE_MIDI[root];
-  if (rootMidi === undefined) return "?";
-  const semitones = ((noteMidi - rootMidi) % 12 + 12) % 12;
-  return SEMITONE_TO_INTERVAL[semitones] ?? "?";
+  if (rootMidi === undefined) return "#6b7280";
+  const semitones = ((OPEN_MIDI[string] + fret - rootMidi) % 12 + 12) % 12;
+  return SEMITONE_COLORS[semitones] ?? "#6b7280";
 }
 
 function stringX(s: StringNumber): number {
@@ -165,10 +165,10 @@ export default function Fretboard({
             );
           }
 
-          // Open string — show interval label if it's a chord tone, plain ○ otherwise
-          const label = intervalForStringFret(chord.root, s, 0);
-          const isChordTone = label in INTERVAL_COLORS;
-          const fill = isChordTone ? INTERVAL_COLORS[label] : "none";
+          // Open string — show note name if chord tone, plain ○ otherwise
+          const noteName = noteNameAtFret(s, 0);
+          const isChordTone = canonicalFret[s] === 0;
+          const fill = isChordTone ? colorForStringFret(chord.root, s, 0) : "none";
           const stroke = isChordTone ? "none" : "#6b7280";
 
           return (
@@ -178,13 +178,12 @@ export default function Fretboard({
                 <text
                   x={x} y={y + 3}
                   textAnchor="middle"
-                  fontSize={label.length > 2 ? 8 : 9}
+                  fontSize={noteName.length > 1 ? 7 : 9}
                   fill="white" fontWeight="bold" fontFamily="sans-serif"
                 >
-                  {label}
+                  {noteName}
                 </text>
               )}
-              {/* larger hit area */}
               <circle cx={x} cy={y} r={14} fill="transparent" />
             </g>
           );
@@ -216,18 +215,12 @@ export default function Fretboard({
 
           const x = stringX(s);
           const y = fretMidY(state.fret);
-          const label = intervalForStringFret(chord.root, s, state.fret);
-          const isChordTone = label in INTERVAL_COLORS;
-
-          // Is it the right fret?
+          const noteName = noteNameAtFret(s, state.fret);
           const isCorrect = canonicalFret[s] === state.fret;
-          const fill = isCorrect && isChordTone
-            ? INTERVAL_COLORS[label]
-            : isCorrect
-            ? "#6b7280"
-            : "#7f1d1d"; // dark red for wrong fret
-
-          const fontSize = label.length > 3 ? 8 : label.length > 2 ? 9 : 11;
+          const fill = isCorrect
+            ? colorForStringFret(chord.root, s, state.fret)
+            : "#7f1d1d";
+          const fontSize = noteName.length > 1 ? 9 : 11;
 
           return (
             <g key={`note-${s}`}>
@@ -237,7 +230,7 @@ export default function Fretboard({
                 textAnchor="middle" fontSize={fontSize}
                 fill="white" fontWeight="bold" fontFamily="sans-serif"
               >
-                {isCorrect ? label : "✗"}
+                {isCorrect ? noteName : "✗"}
               </text>
             </g>
           );
