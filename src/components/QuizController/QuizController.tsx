@@ -41,6 +41,7 @@ type QuizAction =
   | { type: "TOGGLE_OPEN_MUTE"; string: StringNumber }
   | { type: "NEXT_CHORD" }
   | { type: "SKIP" }
+  | { type: "ADVANCE" }
   | { type: "SUBMIT" }
   | { type: "CLEAR" }
   | { type: "RESET"; grade: GradeNumber };
@@ -144,6 +145,10 @@ function makeReducer(mode: Mode) {
       };
     }
 
+    case "ADVANCE": {
+      return { ...state, ...advanceQueue(state, isExam) };
+    }
+
     case "CLEAR":
       return {
         ...state,
@@ -243,7 +248,7 @@ export default function QuizController({ grade, mode = "practice" }: { grade: Gr
   }, []);
 
   const handleExamNext = useCallback(() => {
-    dispatch({ type: "SKIP" });
+    dispatch({ type: "ADVANCE" });
     setTimeout(() => fretboardRef.current?.focusFirstCell(), 0);
   }, []);
 
