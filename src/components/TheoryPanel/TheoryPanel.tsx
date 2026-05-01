@@ -22,7 +22,6 @@ const SEMITONE_TO_LABEL: Record<number, string> = {
   0: "R", 2: "2", 3: "m3", 4: "3", 5: "4", 7: "5", 9: "6", 10: "7", 11: "maj7",
 };
 
-
 function semitoneLabel(root: string, note: string): string {
   const diff = (NOTE_MIDI[note] ?? 0) - (NOTE_MIDI[root] ?? 0);
   const semitones = ((diff % 12) + 12) % 12;
@@ -39,11 +38,10 @@ interface TheoryPanelProps {
 }
 
 export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
-  const scaleNotes = getParentScaleNotes(chord.root, chord.quality);
-  const chordNoteSet = new Set(getChordNotes(chord.root, chord.quality));
+  const scaleNotes = getParentScaleNotes(chord.root, chord.scale);
+  const chordNotes = getChordNotes(chord.root, chord.quality);
+  const chordNoteSet = new Set(chordNotes);
 
-  // A note is "checked" if the student has placed the correct fret on any string
-  // that any accepted voicing says should be at that fret
   const allFingerings = chord.fingerings.flat();
   const checkedPitchClasses = new Set<string>();
   for (const p of placedNotes) {
@@ -56,31 +54,42 @@ export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
   }
 
   const isAdd9 = chord.quality.includes("add9") || chord.quality === "9";
+  const isDominant7 = chord.quality === "7";
+
+  // For dominant 7ths, find the ♭7 note (in chord but not in major scale)
+  const flatSeven = isDominant7
+    ? chordNotes.find((n) => !scaleNotes.includes(n)) ?? null
+    : null;
+
+  const scaleLabel = chord.scale === "minor" ? strings.theory.naturalMinor : strings.theory.major;
 
   return (
     <div className="mt-0 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-transparent rounded-xl w-full">
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-        {chord.root} {chord.quality.includes("m") && !chord.quality.includes("maj") ? strings.theory.naturalMinor : strings.theory.major} {strings.theory.scale}
+        {chord.root} {scaleLabel} {strings.theory.scale}
       </p>
-      <div className="flex gap-1 justify-between">
+      <div className="flex gap-1 justify-between items-start">
         {scaleNotes.map((note) => {
           const label = semitoneLabel(chord.root, note);
-          const isInChord = chordNoteSet.has(note);
-          const isChecked = checkedPitchClasses.has(note);
-          const opacityClass = isInChord ? "" : "opacity-30";
+          // For dominant 7ths, swap the maj7 scale degree for the ♭7, nudged down
+          const isSwappedForFlat7 = isDominant7 && label === "maj7" && flatSeven !== null;
+          const displayNote = isSwappedForFlat7 ? flatSeven! : note;
+          const displayLabel = isSwappedForFlat7 ? "♭7" : label;
+          const isInChord = chordNoteSet.has(displayNote);
+          const isChecked = checkedPitchClasses.has(displayNote);
           const show9 = isAdd9 && label === "2";
 
           return (
-            <NoteCircle
-              key={note}
-              label={note}
-              bgColor={isInChord ? (INTERVAL_COLOR_BY_LABEL[label] ?? COLOR_GRAY) : undefined}
-              borderColor={isInChord ? undefined : undefined}
-              dim={!isInChord}
-              badge={show9 ? "9" : undefined}
-              sublabel={label}
-              checked={isChecked}
-            />
+            <div key={note} className={isSwappedForFlat7 ? "mt-3" : ""}>
+              <NoteCircle
+                label={displayNote}
+                bgColor={isInChord ? (INTERVAL_COLOR_BY_LABEL[displayLabel] ?? COLOR_GRAY) : undefined}
+                dim={!isInChord}
+                badge={show9 ? "9" : undefined}
+                sublabel={displayLabel}
+                checked={isChecked}
+              />
+            </div>
           );
         })}
       </div>
