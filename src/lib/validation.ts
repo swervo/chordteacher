@@ -2,13 +2,13 @@ import type { ChordDefinition, PlacedNote, StringStates, ValidationResult } from
 import { pitchClassAtFret } from "./fretboard";
 import { getChordNotes } from "./theory";
 
-// Convert StringStates map → sounding PlacedNote[] (open fret=0, fret notes)
+// Convert StringStates map → sounding PlacedNote[] (only actively placed notes)
 export function activePlacedNotes(states: StringStates): PlacedNote[] {
   return (Object.entries(states) as [string, StringStates[keyof StringStates]][])
-    .filter(([, s]) => s.kind !== "muted")
+    .filter(([, s]) => s.kind === "fret")
     .map(([str, s]) => ({
       string: Number(str) as PlacedNote["string"],
-      fret: s.kind === "fret" ? s.fret : 0,
+      fret: (s as { kind: "fret"; fret: number }).fret,
     }));
 }
 
