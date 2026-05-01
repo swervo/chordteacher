@@ -11,12 +11,14 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@xstate/react": "^6.1.0",
     "next": "^16.2.4",
     "react": "^18",
     "react-dom": "^18",
     "soundfont-player": "^0.12.0",
     "tonal": "^6.4.3",
-    "tone": "^15.1.22"
+    "tone": "^15.1.22",
+    "xstate": "^5.31.0"
   },
   "devDependencies": {
     "@types/css-modules": "^1.0.5",
