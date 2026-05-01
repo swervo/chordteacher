@@ -4,6 +4,7 @@ import type { ChordDefinition, PlacedNote, StringNumber } from "@/types/chord";
 import { getChordNotes, getParentScaleNotes } from "@/lib/theory";
 import { strings } from "@/lib/strings";
 import NoteCircle from "@/components/NoteCircle";
+import { INTERVAL_COLOR_BY_LABEL, COLOR_GRAY } from "@/lib/colors";
 
 const NOTE_MIDI: Record<string, number> = {
   C: 60, "C#": 61, Db: 61, D: 62, "D#": 63, Eb: 63,
@@ -21,17 +22,6 @@ const SEMITONE_TO_LABEL: Record<number, string> = {
   0: "R", 2: "2", 3: "m3", 4: "3", 5: "4", 7: "5", 9: "6", 10: "7", 11: "maj7",
 };
 
-const INTERVAL_COLORS_HEX: Record<string, string> = {
-  R:      "#ef4444",
-  "3":    "#3b82f6",
-  "m3":   "#8b5cf6",
-  "5":    "#22c55e",
-  "maj7": "#a855f7",
-  "7":    "#f97316",
-  "2":    "#f59e0b",
-  "4":    "#f59e0b",
-  "6":    "#f59e0b",
-};
 
 function semitoneLabel(root: string, note: string): string {
   const diff = (NOTE_MIDI[note] ?? 0) - (NOTE_MIDI[root] ?? 0);
@@ -84,7 +74,7 @@ export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
             <NoteCircle
               key={note}
               label={note}
-              bgColor={isInChord ? (INTERVAL_COLORS_HEX[label] ?? "#6b7280") : undefined}
+              bgColor={isInChord ? (INTERVAL_COLOR_BY_LABEL[label] ?? COLOR_GRAY) : undefined}
               borderColor={isInChord ? undefined : undefined}
               dim={!isInChord}
               badge={show9 ? "9" : undefined}

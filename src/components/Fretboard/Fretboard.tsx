@@ -3,6 +3,7 @@
 import type { ChordDefinition, StringNumber, StringStates } from "@/types/chord";
 import { useTheme } from "@/lib/useTheme";
 import NoteCircle from "@/components/NoteCircle";
+import { INTERVAL_COLORS, COLOR_GRAY } from "@/lib/colors";
 
 const NUM_FRETS = 5;
 const STRINGS_LR: StringNumber[] = [6, 5, 4, 3, 2, 1];
@@ -27,20 +28,15 @@ const NOTE_MIDI: Record<string, number> = {
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
-const SEMITONE_COLORS: Record<number, string> = {
-  0: "#ef4444", 4: "#3b82f6", 3: "#8b5cf6", 7: "#22c55e",
-  11: "#a855f7", 10: "#f97316", 2: "#f59e0b", 5: "#f59e0b", 9: "#f59e0b",
-};
-
 function noteNameAtFret(string: StringNumber, fret: number): string {
   return NOTE_NAMES[(OPEN_MIDI[string] + fret) % 12];
 }
 
 function colorForStringFret(root: string, string: StringNumber, fret: number): string {
   const rootMidi = NOTE_MIDI[root];
-  if (rootMidi === undefined) return "#6b7280";
+  if (rootMidi === undefined) return COLOR_GRAY;
   const semitones = ((OPEN_MIDI[string] + fret - rootMidi) % 12 + 12) % 12;
-  return SEMITONE_COLORS[semitones] ?? "#6b7280";
+  return INTERVAL_COLORS[semitones] ?? COLOR_GRAY;
 }
 
 interface FretboardProps {
