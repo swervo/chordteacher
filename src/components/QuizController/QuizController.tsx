@@ -86,7 +86,7 @@ function makeReducer(mode: Mode) {
     case "PLACE_NOTE": {
       const current = state.stringStates[action.string];
       const next: StringState = (current.kind === "fret" && current.fret === action.fret)
-        ? { kind: "open" }
+        ? (isExam ? { kind: "fret", fret: 0 } : { kind: "open" })
         : { kind: "fret", fret: action.fret };
       const updated: StringStates = { ...state.stringStates, [action.string]: next };
       if (isExam) return { ...state, stringStates: updated };
