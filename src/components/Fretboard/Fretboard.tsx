@@ -1,11 +1,13 @@
 "use client";
 
+import { useState, useCallback, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
 import type { ChordDefinition, StringNumber, StringStates } from "@/types/chord";
 import { useTheme } from "@/lib/useTheme";
 import NoteCircle from "@/components/NoteCircle";
 import { INTERVAL_COLORS, COLOR_GRAY } from "@/lib/colors";
 
 const NUM_FRETS = 5;
+const NUM_ROWS = NUM_FRETS + 1; // row 0 = indicators, rows 1-5 = frets
 const STRINGS_LR: StringNumber[] = [6, 5, 4, 3, 2, 1];
 
 const STRING_PX: Record<StringNumber, number> = {
@@ -39,33 +41,82 @@ function colorForStringFret(root: string, string: StringNumber, fret: number): s
   return INTERVAL_COLORS[semitones] ?? COLOR_GRAY;
 }
 
+export interface FretboardHandle {
+  focusFirstCell: () => void;
+}
+
 interface FretboardProps {
   chord: ChordDefinition;
   stringStates: StringStates;
   onFretClick: (string: StringNumber, fret: number) => void;
   onToggleOpenMute: (string: StringNumber) => void;
+  disabled?: boolean;
 }
 
-export default function Fretboard({ chord, stringStates, onFretClick, onToggleOpenMute }: FretboardProps) {
+const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard(
+  { chord, stringStates, onFretClick, onToggleOpenMute, disabled = false },
+  ref
+) {
   const { isDark } = useTheme();
+  const [focusedCell, setFocusedCell] = useState<{ row: number; col: number } | null>(null);
+
+  // 2D array of refs: cellRefs[row][col]
+  const cellRefs = useRef<(HTMLButtonElement | null)[][]>(
+    Array.from({ length: NUM_ROWS }, () => Array(STRINGS_LR.length).fill(null))
+  );
+
+  // When focusedCell changes via arrow keys, move DOM focus to the new button
+  const lastFocusSource = useRef<"keyboard" | "mouse">("mouse");
+  useEffect(() => {
+    if (lastFocusSource.current === "keyboard" && focusedCell) {
+      cellRefs.current[focusedCell.row]?.[focusedCell.col]?.focus();
+    }
+  }, [focusedCell]);
+
+  // Reset focus position when chord changes
+  useEffect(() => {
+    setFocusedCell(null);
+  }, [chord.id]);
+
+  useImperativeHandle(ref, () => ({
+    focusFirstCell: () => {
+      setFocusedCell(null);
+      cellRefs.current[0]?.[0]?.focus();
+    },
+  }));
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, row: number, col: number) => {
+    let nextRow = row;
+    let nextCol = col;
+
+    switch (e.key) {
+      case "ArrowRight": e.preventDefault(); nextCol = Math.min(col + 1, STRINGS_LR.length - 1); break;
+      case "ArrowLeft":  e.preventDefault(); nextCol = Math.max(col - 1, 0); break;
+      case "ArrowDown":  e.preventDefault(); nextRow = Math.min(row + 1, NUM_FRETS); break;
+      case "ArrowUp":    e.preventDefault(); nextRow = Math.max(row - 1, 0); break;
+      default: return;
+    }
+
+    lastFocusSource.current = "keyboard";
+    setFocusedCell({ row: nextRow, col: nextCol });
+  }, []);
 
   const C = isDark ? {
     nut: "#e5e7eb", fret: "#374151",
     string: "#6b7280", stringMuted: "#1e293b",
     marker: "#374151",
     openStroke: "#6b7280", dashStroke: "#4b5563",
-    muteStroke: "#6b7280", wrongFill: "#7f1d1d",
+    muteStroke: "#6b7280",
     label: "#6b7280",
   } : {
     nut: "#1f2937", fret: "#e5e7eb",
     string: "#9ca3af", stringMuted: "#f3f4f6",
     marker: "#e5e7eb",
     openStroke: "#9ca3af", dashStroke: "#d1d5db",
-    muteStroke: "#9ca3af", wrongFill: "#fca5a5",
+    muteStroke: "#9ca3af",
     label: "#9ca3af",
   };
 
-  // A fret position is valid if it appears in any voicing
   const validPositions = new Set(
     chord.fingerings.flatMap((fingering) =>
       fingering.filter((f) => !f.muted && f.fret !== null).map((f) => `${f.string}-${f.fret}`)
@@ -77,18 +128,12 @@ export default function Fretboard({ chord, stringStates, onFretClick, onToggleOp
     )
   );
 
-  // Each column is equal width. Outer strings sit at 50% of col 1 and col 6.
-  // The neck boundary runs from the centre of col 1 to the centre of col 6,
-  // which is 5/6 of the total width, offset by half a column (1/12).
-  // We achieve this by making the outer column cells half-clickable and
-  // drawing the nut/fret lines using left/right border on an inner wrapper.
-
   return (
-    <div className="w-full select-none">
+    <div className="w-full select-none" role="grid" aria-label="Guitar fretboard">
 
-      {/* Indicator row — same grid, circles centred in each column */}
-      <div className="grid grid-cols-6 mb-2">
-        {STRINGS_LR.map((s) => {
+      {/* Indicator row */}
+      <div className="grid grid-cols-6 mb-2" role="row">
+        {STRINGS_LR.map((s, col) => {
           const state = stringStates[s];
           const isSelectedOpen = state.kind === "fret" && state.fret === 0;
           const isMuted = state.kind === "muted";
@@ -114,23 +159,33 @@ export default function Fretboard({ chord, stringStates, onFretClick, onToggleOp
             borderColor = C.openStroke;
           }
 
+          const stateDesc = isSelectedOpen ? "open" : isMuted ? "muted" : "unplayed";
+
           return (
-            <div key={s} className="flex flex-col items-center gap-0.5">
+            <div key={s} role="gridcell" className="flex flex-col items-center gap-0.5">
               <span className="text-xs font-mono" style={{ color: C.label }}>{STRING_LABELS[s]}</span>
-              <NoteCircle
-                label={label}
-                bgColor={bgColor}
-                borderColor={borderColor}
-                dashed={dashed}
-                onClick={() => onToggleOpenMute(s)}
-              />
+              <button
+                ref={(el) => { cellRefs.current[0][col] = el; }}
+                tabIndex={!disabled && ((!focusedCell && col === 0) || (focusedCell?.row === 0 && focusedCell?.col === col)) ? 0 : -1}
+                aria-label={`String ${STRING_LABELS[s]}, ${stateDesc}`}
+                className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                onClick={() => { lastFocusSource.current = "mouse"; onToggleOpenMute(s); }}
+                onFocus={() => setFocusedCell({ row: 0, col })}
+                onKeyDown={(e) => handleKeyDown(e, 0, col)}
+              >
+                <NoteCircle
+                  label={label}
+                  bgColor={bgColor}
+                  borderColor={borderColor}
+                  dashed={dashed}
+                />
+              </button>
             </div>
           );
         })}
       </div>
 
-      {/* Nut + fret rows — nut and all fret lines use identical left/right offsets */}
-      {/* Each of 6 columns is 1/6 wide; outer strings sit at col centres = 1/12 from each edge = 8.33% */}
+      {/* Nut */}
       <div className="relative" style={{ height: 4 }}>
         <div className="absolute top-0 left-[8.33%] right-[8.33%]"
           style={{ borderTop: `5px solid ${C.nut}` }} />
@@ -143,6 +198,7 @@ export default function Fretboard({ chord, stringStates, onFretClick, onToggleOp
         return (
           <div
             key={fret}
+            role="row"
             className="relative grid grid-cols-6"
             style={{ height: 68 }}
           >
@@ -157,31 +213,37 @@ export default function Fretboard({ chord, stringStates, onFretClick, onToggleOp
               </div>
             )}
 
-            {STRINGS_LR.map((s) => {
+            {STRINGS_LR.map((s, col) => {
               const state = stringStates[s];
               const isPlacedHere = state.kind === "fret" && state.fret === fret;
               const isCorrect = isPlacedHere && validPositions.has(`${s}-${fret}`);
               const stringColor = state.kind === "muted" ? C.stringMuted : C.string;
 
               return (
-                <div
-                  key={s}
-                  className="relative flex items-center justify-center cursor-pointer hover:bg-white/5"
-                  onClick={() => onFretClick(s, fret)}
-                >
+                <div key={s} role="gridcell" className="relative flex items-center justify-center">
                   {/* String line */}
                   <div
                     className="absolute inset-y-0 left-1/2 -translate-x-1/2 pointer-events-none"
                     style={{ width: STRING_PX[s], backgroundColor: stringColor }}
                   />
-                  {/* Note dot */}
-                  {isPlacedHere && (
-                    <NoteCircle
-                      label={isCorrect ? noteNameAtFret(s, fret) : ""}
-                      bgColor={isCorrect ? colorForStringFret(chord.root, s, fret) : undefined}
-                      borderColor={isCorrect ? undefined : C.dashStroke}
-                    />
-                  )}
+                  <button
+                    ref={(el) => { cellRefs.current[fret][col] = el; }}
+                    tabIndex={!disabled && focusedCell?.row === fret && focusedCell?.col === col ? 0 : -1}
+                    aria-label={`String ${STRING_LABELS[s]}, fret ${fret}`}
+                    aria-pressed={isPlacedHere}
+                    className="absolute inset-0 w-full h-full flex items-center justify-center hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70"
+                    onClick={() => { lastFocusSource.current = "mouse"; onFretClick(s, fret); }}
+                    onFocus={() => setFocusedCell({ row: fret, col })}
+                    onKeyDown={(e) => handleKeyDown(e, fret, col)}
+                  >
+                    {isPlacedHere && (
+                      <NoteCircle
+                        label={isCorrect ? noteNameAtFret(s, fret) : ""}
+                        bgColor={isCorrect ? colorForStringFret(chord.root, s, fret) : undefined}
+                        borderColor={isCorrect ? undefined : C.dashStroke}
+                      />
+                    )}
+                  </button>
                 </div>
               );
             })}
@@ -190,4 +252,6 @@ export default function Fretboard({ chord, stringStates, onFretClick, onToggleOp
       })}
     </div>
   );
-}
+});
+
+export default Fretboard;

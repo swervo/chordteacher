@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import type {
   ChordDefinition, GradeNumber, StringNumber, StringState,
@@ -9,7 +9,7 @@ import type {
 import { getChordsForGrade, shuffleChords } from "@/data/index";
 import { strings } from "@/lib/strings";
 import { validateAnswer, activePlacedNotes } from "@/lib/validation";
-import Fretboard from "@/components/Fretboard/Fretboard";
+import Fretboard, { type FretboardHandle } from "@/components/Fretboard/Fretboard";
 import TheoryPanel from "@/components/TheoryPanel/TheoryPanel";
 
 const AudioEngine = dynamic(() => import("@/components/AudioEngine/AudioEngine"), { ssr: false });
@@ -139,9 +139,13 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
 
   const chord = state.chordQueue[state.currentIndex];
 
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
+  const fretboardRef = useRef<FretboardHandle>(null);
+
   useEffect(() => {
-    if (state.phase === "success" && strumChordFn && chord) {
-      strumChordFn(chord.fingerings[0]);
+    if (state.phase === "success") {
+      if (strumChordFn && chord) strumChordFn(chord.fingerings[0]);
+      nextButtonRef.current?.focus();
     }
   }, [state.phase, chord]);
 
@@ -165,6 +169,11 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
   const handleHear = useCallback(() => {
     if (chord && strumChordFn) strumChordFn(chord.fingerings[0]);
   }, [chord]);
+
+  const handleNext = useCallback(() => {
+    dispatch({ type: "NEXT_CHORD" });
+    setTimeout(() => fretboardRef.current?.focusFirstCell(), 0);
+  }, []);
 
   if (!chord) return null;
 
@@ -198,17 +207,20 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
       <div className="w-full max-w-sm mx-auto flex flex-col gap-6">
         <div className="relative">
           <Fretboard
+            ref={fretboardRef}
             chord={chord}
             stringStates={state.stringStates}
             onFretClick={handleFretClick}
             onToggleOpenMute={handleToggleOpenMute}
+            disabled={state.phase === "success"}
           />
           {state.phase === "success" && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl bg-white/50 dark:bg-gray-900/60 backdrop-blur-sm">
               <span className="text-5xl">✓</span>
               <span className="text-2xl font-bold text-green-700 dark:text-green-300">{strings.quiz.correct}</span>
               <button
-                onClick={() => dispatch({ type: "NEXT_CHORD" })}
+                ref={nextButtonRef}
+                onClick={handleNext}
                 className="px-6 py-2 bg-green-600 hover:bg-green-500 dark:bg-green-700 dark:hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
               >
                 {strings.quiz.next}
@@ -234,7 +246,7 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
           {strings.quiz.clear}
         </button>
         <button
-          onClick={() => dispatch({ type: "NEXT_CHORD" })}
+          onClick={handleNext}
           className="px-5 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg text-sm transition-colors"
         >
           {strings.quiz.skip}
