@@ -30,11 +30,8 @@ export function getIntervalLabel(root: string, notePC: string): string {
   return semitoneToInterval[normalized] ?? notePC;
 }
 
-export function getParentScaleNotes(root: string, quality: string): string[] {
-  // All LCM grades 1-4 derive from major scale
-  // (minor 7ths and dominant 7ths also shown against major for learning)
-  const scaleName = quality.includes("m") ? "natural minor" : "major";
-  return Scale.get(`${root} ${scaleName}`).notes;
+export function getParentScaleNotes(root: string, scale: "major" | "minor"): string[] {
+  return Scale.get(`${root} ${scale}`).notes;
 }
 
 export function getChordIntervals(root: string, quality: string): string[] {

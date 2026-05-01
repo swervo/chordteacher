@@ -48,7 +48,7 @@ The `quality` field must match a Tonal.js chord type string (used by the theory 
 
 ### Versioning
 
-The app version is displayed in the bottom-right corner of every page. It lives in `src/lib/version.ts`. **Bump the version number before each commit, then push immediately after — Vercel deploys on push.** Use judgement on the increment: +0.01 for small fixes or tweaks, +0.1 for meaningful features, +1.0 for major milestones.
+The app version is displayed in the bottom-right corner of every page. It lives in `src/lib/version.ts`. **Bump the version number before each commit, then push immediately after — Vercel deploys on push.** Always separate bug fixes and features into distinct commits — don't bundle them together. Use judgement on the increment: +0.01 for small fixes or tweaks, +0.1 for meaningful features, +1.0 for major milestones.
 
 ### Deployment
 

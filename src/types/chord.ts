@@ -16,6 +16,7 @@ export interface ChordDefinition {
   quality: string;
   grade: GradeNumber;
   syllabus: "LCM";
+  scale: "major" | "minor";
   verified?: boolean;
   fingerings: StringFingering[][]; // generated from tabs at load time; [0] is canonical
 }
