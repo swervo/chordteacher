@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import ModeToggle from "@/components/ModeToggle";
 import { strings } from "@/lib/strings";
 
 export default function Home() {
@@ -8,7 +9,10 @@ export default function Home() {
       <div className="max-w-md w-full">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{strings.app.title}</h1>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <ModeToggle />
+            <ThemeToggle />
+          </div>
         </div>
         <p className="text-gray-500 dark:text-gray-400 mb-10">{strings.app.subtitle}</p>
 

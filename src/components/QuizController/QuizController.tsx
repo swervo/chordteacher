@@ -8,6 +8,7 @@ import type {
 } from "@/types/chord";
 import { getChordsForGrade, shuffleChords } from "@/data/index";
 import { strings } from "@/lib/strings";
+import type { Mode } from "@/lib/useMode";
 import { validateAnswer, activePlacedNotes } from "@/lib/validation";
 import Fretboard, { type FretboardHandle } from "@/components/Fretboard/Fretboard";
 import TheoryPanel from "@/components/TheoryPanel/TheoryPanel";
@@ -126,7 +127,7 @@ let strumChordFn: ((fingering: ChordDefinition["fingerings"][number]) => Promise
 let pluckNoteFn: ((string: StringNumber, fret: number) => Promise<void>) | null = null;
 let muteSoundFn: (() => void) | null = null;
 
-export default function QuizController({ grade }: { grade: GradeNumber }) {
+export default function QuizController({ grade, mode = "practice" }: { grade: GradeNumber; mode?: Mode }) {
   const [state, dispatch] = useReducer(reducer, null, () => ({
     grade,
     chordQueue: buildQueue(grade),
