@@ -122,7 +122,7 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
   }
 }
 
-let strumChordFn: ((fingering: ChordDefinition["fingering"]) => Promise<void>) | null = null;
+let strumChordFn: ((fingering: ChordDefinition["fingerings"][number]) => Promise<void>) | null = null;
 let pluckNoteFn: ((string: StringNumber, fret: number) => Promise<void>) | null = null;
 let muteSoundFn: (() => void) | null = null;
 
@@ -141,7 +141,7 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
 
   useEffect(() => {
     if (state.phase === "success" && strumChordFn && chord) {
-      strumChordFn(chord.fingering);
+      strumChordFn(chord.fingerings[0]);
     }
   }, [state.phase, chord]);
 
@@ -163,7 +163,7 @@ export default function QuizController({ grade }: { grade: GradeNumber }) {
   );
 
   const handleHear = useCallback(() => {
-    if (chord && strumChordFn) strumChordFn(chord.fingering);
+    if (chord && strumChordFn) strumChordFn(chord.fingerings[0]);
   }, [chord]);
 
   if (!chord) return null;

@@ -15,12 +15,12 @@ function tabToFingering(tab: string): StringFingering[] {
   });
 }
 
-type RawChord = Omit<ChordDefinition, "fingering"> & { tab: string };
+type RawChord = Omit<ChordDefinition, "fingerings"> & { tabs: string[] };
 
 function parseChords(raw: RawChord[]): ChordDefinition[] {
-  return raw.map(({ tab, ...rest }) => ({
+  return raw.map(({ tabs, ...rest }) => ({
     ...rest,
-    fingering: tabToFingering(tab),
+    fingerings: tabs.map(tabToFingering),
   }));
 }
 

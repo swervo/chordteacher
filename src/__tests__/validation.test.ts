@@ -3,14 +3,14 @@ import type { ChordDefinition, StringStates } from "@/types/chord";
 
 // Helper to build a ChordDefinition from a tab string
 // Tab format: E-A-D-G-B-e (string 6 to string 1), x=muted, digit=fret
-function chordFromTab(id: string, name: string, root: string, quality: string, grade: 1|2|3|4, tab: string): ChordDefinition {
-  const fingering = tab.split("-").map((val, i) => {
+function chordFromTab(id: string, name: string, root: string, quality: string, grade: 1|2|3|4, ...tabs: string[]): ChordDefinition {
+  const fingerings = tabs.map((tab) => tab.split("-").map((val, i) => {
     const string = (6 - i) as 1|2|3|4|5|6;
     const muted = val === "x";
     const fret = muted ? null : parseInt(val);
     return { string, fret, finger: 0 as 0, muted, open: fret === 0 };
-  });
-  return { id, name, root, quality, grade, syllabus: "LCM" as const, fingering };
+  }));
+  return { id, name, root, quality, grade, syllabus: "LCM" as const, fingerings };
 }
 
 // Helper to build StringStates
@@ -106,6 +106,26 @@ test("Esus4: correct full answer", () => {
 
 test("Esus4: wrong fret on A string", () => {
   expect(validateAnswer(states("0","3","2","2","0","0"), Esus4)).toBe("incorrect");
+});
+
+// ─── Alternate voicings ──────────────────────────────────────────────────────
+
+const Gmaj7 = chordFromTab("gmaj7", "Gmaj7", "G", "maj7", 2, "3-2-0-0-0-2", "3-x-0-0-0-2");
+
+test("Gmaj7: canonical voicing is correct", () => {
+  expect(validateAnswer(states("3","2","0","0","0","2"), Gmaj7)).toBe("correct");
+});
+
+test("Gmaj7: alternate voicing (muted A) is correct", () => {
+  expect(validateAnswer(states("3","x","0","0","0","2"), Gmaj7)).toBe("correct");
+});
+
+test("Gmaj7: wrong fret on e string is incorrect", () => {
+  expect(validateAnswer(states("3","2","0","0","0","1"), Gmaj7)).toBe("incorrect");
+});
+
+test("Gmaj7: partial input is incomplete", () => {
+  expect(validateAnswer(states("3","o","0","0","0","o"), Gmaj7)).toBe("incomplete");
 });
 
 // ─── String state cycles ─────────────────────────────────────────────────────

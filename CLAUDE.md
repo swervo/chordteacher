@@ -24,7 +24,7 @@ A Next.js App Router quiz app. The quiz page is at `/quiz/[grade]` and is entire
 
 3. **Validation** (`src/lib/validation.ts`) compares the student's `StringStates` directly against `chord.fingering` from the JSON — it does not use Tonal for validation. Each string is checked: correct fret, open when required, or muted when required.
 
-4. **Fretboard** (`src/components/Fretboard/Fretboard.tsx`) is a pure SVG component. It computes note names and interval colours from `OPEN_MIDI` + `NOTE_MIDI` tables inline — no Tonal dependency. Colours are keyed by semitone distance from root.
+4. **Fretboard** (`src/components/Fretboard/Fretboard.tsx`) is an HTML component (not SVG). It computes note names and interval colours from `OPEN_MIDI` + `NOTE_MIDI` tables inline — no Tonal dependency. Colours are keyed by semitone distance from root.
 
 5. **Theory panel** (`src/components/TheoryPanel/TheoryPanel.tsx`) uses Tonal (`getChordNotes`, `getParentScaleNotes` from `src/lib/theory.ts`) to get scale and chord notes, then applies the same semitone arithmetic as the fretboard for interval labels. A note gets a ✓ when its pitch class appears in a correctly-placed note per the canonical fingering.
 
@@ -45,6 +45,10 @@ Add a line to the relevant `src/data/chords-grade[N].json`:
 Tab is E-A-D-G-B-e order, `x` = muted, digits = fret numbers.
 
 The `quality` field must match a Tonal.js chord type string (used by the theory panel): `"M"` for major, `"m7"`, `"maj7"`, `"sus2"`, `"sus4"`, `"6"`, `"add9"`, `"7"` etc.
+
+### Versioning
+
+The app version is displayed in the bottom-right corner of every page. It lives in `src/lib/version.ts`. **Bump the version number before each commit.** Use judgement on the increment: +0.01 for small fixes or tweaks, +0.1 for meaningful features, +1.0 for major milestones.
 
 ### Deployment
 

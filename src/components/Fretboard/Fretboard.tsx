@@ -69,10 +69,17 @@ export default function Fretboard({ chord, stringStates, onFretClick, onToggleOp
     label: "#9ca3af",
   };
 
-  const canonicalFret: Record<StringNumber, number | null> = {} as Record<StringNumber, number | null>;
-  for (const f of chord.fingering) {
-    canonicalFret[f.string as StringNumber] = f.muted ? null : (f.fret ?? 0);
-  }
+  // A fret position is valid if it appears in any voicing
+  const validPositions = new Set(
+    chord.fingerings.flatMap((fingering) =>
+      fingering.filter((f) => !f.muted && f.fret !== null).map((f) => `${f.string}-${f.fret}`)
+    )
+  );
+  const validOpenStrings = new Set(
+    chord.fingerings.flatMap((fingering) =>
+      fingering.filter((f) => f.fret === 0).map((f) => f.string)
+    )
+  );
 
   // Each column is equal width. Outer strings sit at 50% of col 1 and col 6.
   // The neck boundary runs from the centre of col 1 to the centre of col 6,
@@ -97,9 +104,10 @@ export default function Fretboard({ chord, stringStates, onFretClick, onToggleOp
           let dashed = false;
 
           if (isSelectedOpen) {
-            const isCorrect = canonicalFret[s] === 0;
-            label = isCorrect ? noteNameAtFret(s, 0) : "✗";
-            bgColor = isCorrect ? colorForStringFret(chord.root, s, 0) : C.wrongFill;
+            const isCorrect = validOpenStrings.has(s);
+            label = isCorrect ? noteNameAtFret(s, 0) : "";
+            bgColor = isCorrect ? colorForStringFret(chord.root, s, 0) : undefined;
+            borderColor = isCorrect ? undefined : C.dashStroke;
           } else if (isMuted) {
             label = "×";
             borderColor = C.muteStroke;
@@ -156,7 +164,7 @@ export default function Fretboard({ chord, stringStates, onFretClick, onToggleOp
             {STRINGS_LR.map((s) => {
               const state = stringStates[s];
               const isPlacedHere = state.kind === "fret" && state.fret === fret;
-              const isCorrect = isPlacedHere && canonicalFret[s] === fret;
+              const isCorrect = isPlacedHere && validPositions.has(`${s}-${fret}`);
               const stringColor = state.kind === "muted" ? C.stringMuted : C.string;
 
               return (
@@ -173,8 +181,9 @@ export default function Fretboard({ chord, stringStates, onFretClick, onToggleOp
                   {/* Note dot */}
                   {isPlacedHere && (
                     <NoteCircle
-                      label={isCorrect ? noteNameAtFret(s, fret) : "✗"}
-                      bgColor={isCorrect ? colorForStringFret(chord.root, s, fret) : C.wrongFill}
+                      label={isCorrect ? noteNameAtFret(s, fret) : ""}
+                      bgColor={isCorrect ? colorForStringFret(chord.root, s, fret) : undefined}
+                      borderColor={isCorrect ? undefined : C.dashStroke}
                     />
                   )}
                 </div>

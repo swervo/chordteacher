@@ -17,7 +17,7 @@ export interface ChordDefinition {
   grade: GradeNumber;
   syllabus: "LCM";
   verified?: boolean;
-  fingering: StringFingering[]; // generated from tab at load time
+  fingerings: StringFingering[][]; // generated from tabs at load time; [0] is canonical
 }
 
 export type StringState =

@@ -12,39 +12,33 @@ export function activePlacedNotes(states: StringStates): PlacedNote[] {
     }));
 }
 
-export function validateAnswer(
+function checkFingering(
   states: StringStates,
-  chord: ChordDefinition
+  fingering: ChordDefinition["fingerings"][number]
 ): ValidationResult {
   let anyInteraction = false;
   let anyIncorrect = false;
   let anyIncomplete = false;
 
-  for (const f of chord.fingering) {
+  for (const f of fingering) {
     const s = f.string as keyof StringStates;
     const student = states[s];
-    const canonicalFret = f.fret; // null = muted, 0 = open, N = fretted
+    const canonicalFret = f.fret;
 
     if (student.kind === "fret") anyInteraction = true;
     if (student.kind === "muted") anyInteraction = true;
 
     if (f.muted) {
-      // This string must be muted
       if (student.kind === "fret") { anyIncorrect = true; continue; }
       if (student.kind === "open") { anyIncomplete = true; continue; }
-      // kind === "muted" → correct for this string
     } else if (canonicalFret === 0) {
-      // This string must be open
       if (student.kind === "muted") { anyIncorrect = true; continue; }
       if (student.kind === "open") { anyIncomplete = true; continue; }
       if (student.kind === "fret" && student.fret !== 0) { anyIncorrect = true; continue; }
-      // fret:0 or open → correct for this string
     } else {
-      // This string must be fretted at canonicalFret
       if (student.kind === "muted") { anyIncorrect = true; continue; }
       if (student.kind === "open") { anyIncomplete = true; continue; }
       if (student.kind === "fret" && student.fret !== canonicalFret) { anyIncorrect = true; continue; }
-      // correct fret → correct for this string
     }
   }
 
@@ -52,6 +46,21 @@ export function validateAnswer(
   if (anyIncorrect) return "incorrect";
   if (anyIncomplete) return "incomplete";
   return "correct";
+}
+
+export function validateAnswer(
+  states: StringStates,
+  chord: ChordDefinition
+): ValidationResult {
+  // Accept if any voicing matches
+  for (const fingering of chord.fingerings) {
+    if (checkFingering(states, fingering) === "correct") return "correct";
+  }
+  // Return the best (least wrong) result across all voicings
+  const results = chord.fingerings.map((f) => checkFingering(states, f));
+  if (results.every((r) => r === "incomplete")) return "incomplete";
+  if (results.some((r) => r === "incomplete") && results.every((r) => r !== "incorrect")) return "incomplete";
+  return "incorrect";
 }
 
 export function getPlacedIntervalLabel(

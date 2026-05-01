@@ -53,10 +53,11 @@ export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
   const chordNoteSet = new Set(getChordNotes(chord.root, chord.quality));
 
   // A note is "checked" if the student has placed the correct fret on any string
-  // that the canonical fingering says should be at that fret
+  // that any accepted voicing says should be at that fret
+  const allFingerings = chord.fingerings.flat();
   const checkedPitchClasses = new Set<string>();
   for (const p of placedNotes) {
-    const canonical = chord.fingering.find(
+    const canonical = allFingerings.find(
       (f) => f.string === p.string && f.fret === p.fret && !f.muted
     );
     if (canonical) {
