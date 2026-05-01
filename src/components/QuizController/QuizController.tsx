@@ -21,6 +21,10 @@ function allOpen(): StringStates {
   return Object.fromEntries(ALL_STRINGS.map((s) => [s, { kind: "open" }])) as StringStates;
 }
 
+function allSelectedOpen(): StringStates {
+  return Object.fromEntries(ALL_STRINGS.map((s) => [s, { kind: "fret", fret: 0 }])) as StringStates;
+}
+
 interface QuizState {
   grade: GradeNumber;
   chordQueue: ChordDefinition[];
@@ -59,21 +63,23 @@ function applyAndValidate(
   };
 }
 
-function advanceQueue(state: QuizState): Partial<QuizState> {
+function advanceQueue(state: QuizState, isExam = false): Partial<QuizState> {
   const nextIndex = state.currentIndex + 1;
   if (nextIndex >= state.chordQueue.length) {
     return { phase: "complete" };
   }
   return {
     currentIndex: nextIndex,
-    stringStates: allOpen(),
+    stringStates: isExam ? allSelectedOpen() : allOpen(),
     validationResult: null,
     phase: "quiz",
   };
 }
 
-function reducer(state: QuizState, action: QuizAction): QuizState {
+function makeReducer(mode: Mode) {
+  return function reducer(state: QuizState, action: QuizAction): QuizState {
   const chord = state.chordQueue[state.currentIndex];
+  const isExam = mode === "exam";
 
   switch (action.type) {
     case "PLACE_NOTE": {
@@ -82,6 +88,7 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
         ? { kind: "open" }
         : { kind: "fret", fret: action.fret };
       const updated: StringStates = { ...state.stringStates, [action.string]: next };
+      if (isExam) return { ...state, stringStates: updated };
       return { ...state, ...applyAndValidate(updated, chord, state.score) };
     }
 
@@ -100,6 +107,7 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
         next = { kind: "open" };
       }
       const updated: StringStates = { ...state.stringStates, [action.string]: next };
+      if (isExam) return { ...state, stringStates: updated };
       return { ...state, ...applyAndValidate(updated, chord, state.score) };
     }
 
@@ -132,19 +140,24 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
       return {
         ...state,
         skippedChords: [...state.skippedChords, chord],
-        ...advanceQueue(state),
+        ...advanceQueue(state, isExam),
       };
     }
 
     case "CLEAR":
-      return { ...state, stringStates: allOpen(), validationResult: null, phase: "quiz" };
+      return {
+        ...state,
+        stringStates: isExam ? allSelectedOpen() : allOpen(),
+        validationResult: null,
+        phase: "quiz",
+      };
 
     case "RESET":
       return {
         grade: action.grade,
         chordQueue: buildQueue(action.grade),
         currentIndex: 0,
-        stringStates: allOpen(),
+        stringStates: isExam ? allSelectedOpen() : allOpen(),
         validationResult: null,
         phase: "quiz",
         score: 0,
@@ -154,6 +167,7 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
     default:
       return state;
   }
+  };
 }
 
 let strumChordFn: ((fingering: ChordDefinition["fingerings"][number]) => Promise<void>) | null = null;
@@ -161,11 +175,13 @@ let pluckNoteFn: ((string: StringNumber, fret: number) => Promise<void>) | null 
 let muteSoundFn: (() => void) | null = null;
 
 export default function QuizController({ grade, mode = "practice" }: { grade: GradeNumber; mode?: Mode }) {
+  const isExam = mode === "exam";
+  const reducer = makeReducer(mode);
   const [state, dispatch] = useReducer(reducer, null, () => ({
     grade,
     chordQueue: buildQueue(grade),
     currentIndex: 0,
-    stringStates: allOpen(),
+    stringStates: isExam ? allSelectedOpen() : allOpen(),
     validationResult: null,
     phase: "quiz" as const,
     score: 0,
@@ -173,7 +189,6 @@ export default function QuizController({ grade, mode = "practice" }: { grade: Gr
   }));
 
   const chord = state.chordQueue[state.currentIndex];
-  const isExam = mode === "exam";
   const maxScore = state.chordQueue.length;
 
   const nextButtonRef = useRef<HTMLButtonElement>(null);
@@ -204,14 +219,10 @@ export default function QuizController({ grade, mode = "practice" }: { grade: Gr
   const handleFretClick = useCallback(
     (string: StringNumber, fret: number) => {
       if (state.phase === "success" || state.phase === "submitted") return;
-      if (!isExam) dispatch({ type: "PLACE_NOTE", string, fret });
-      else {
-        // In exam mode, just update string state without auto-validating
-        dispatch({ type: "PLACE_NOTE", string, fret });
-      }
+      dispatch({ type: "PLACE_NOTE", string, fret });
       pluckNoteFn?.(string, fret);
     },
-    [state.phase, isExam]
+    [state.phase]
   );
 
   const handleToggleOpenMute = useCallback(
