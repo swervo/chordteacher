@@ -51,10 +51,11 @@ interface FretboardProps {
   onFretClick: (string: StringNumber, fret: number) => void;
   onToggleOpenMute: (string: StringNumber) => void;
   disabled?: boolean;
+  hintsEnabled?: boolean;
 }
 
 const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard(
-  { chord, stringStates, onFretClick, onToggleOpenMute, disabled = false },
+  { chord, stringStates, onFretClick, onToggleOpenMute, disabled = false, hintsEnabled = true },
   ref
 ) {
   const { isDark } = useTheme();
@@ -146,9 +147,9 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
 
           if (isSelectedOpen) {
             const isCorrect = validOpenStrings.has(s);
-            label = isCorrect ? noteNameAtFret(s, 0) : "";
-            bgColor = isCorrect ? colorForStringFret(chord.root, s, 0) : undefined;
-            borderColor = isCorrect ? undefined : C.dashStroke;
+            label = noteNameAtFret(s, 0);
+            bgColor = hintsEnabled && isCorrect ? colorForStringFret(chord.root, s, 0) : COLOR_GRAY;
+            borderColor = undefined;
           } else if (isMuted) {
             label = "×";
             borderColor = C.muteStroke;
@@ -238,9 +239,8 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
                   >
                     {isPlacedHere && (
                       <NoteCircle
-                        label={isCorrect ? noteNameAtFret(s, fret) : ""}
-                        bgColor={isCorrect ? colorForStringFret(chord.root, s, fret) : undefined}
-                        borderColor={isCorrect ? undefined : C.dashStroke}
+                        label={noteNameAtFret(s, fret)}
+                        bgColor={hintsEnabled && isCorrect ? colorForStringFret(chord.root, s, fret) : COLOR_GRAY}
                       />
                     )}
                   </button>

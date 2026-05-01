@@ -35,9 +35,10 @@ function pitchClassFromFret(string: StringNumber, fret: number): string {
 interface TheoryPanelProps {
   chord: ChordDefinition;
   placedNotes: PlacedNote[];
+  hintsEnabled?: boolean;
 }
 
-export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
+export default function TheoryPanel({ chord, placedNotes, hintsEnabled = true }: TheoryPanelProps) {
   const scaleNotes = getParentScaleNotes(chord.root, chord.scale);
   const chordNotes = getChordNotes(chord.root, chord.quality);
   const chordNoteSet = new Set(chordNotes);
@@ -83,11 +84,13 @@ export default function TheoryPanel({ chord, placedNotes }: TheoryPanelProps) {
             <div key={note} className={isSwappedForFlat7 ? "mt-3" : ""}>
               <NoteCircle
                 label={displayNote}
-                bgColor={isInChord ? (INTERVAL_COLOR_BY_LABEL[displayLabel] ?? COLOR_GRAY) : undefined}
-                dim={!isInChord}
-                badge={show9 ? "9" : undefined}
-                sublabel={displayLabel}
-                checked={isChecked}
+                bgColor={hintsEnabled
+                  ? (isInChord ? (INTERVAL_COLOR_BY_LABEL[displayLabel] ?? COLOR_GRAY) : undefined)
+                  : COLOR_GRAY}
+                dim={hintsEnabled ? !isInChord : false}
+                badge={hintsEnabled && show9 ? "9" : undefined}
+                sublabel={hintsEnabled ? displayLabel : undefined}
+                checked={hintsEnabled ? isChecked : undefined}
               />
             </div>
           );
