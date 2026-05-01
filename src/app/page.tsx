@@ -9,12 +9,13 @@ export default function Home() {
       <div className="max-w-md w-full">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{strings.app.title}</h1>
-          <div className="flex items-center gap-2">
-            <ModeToggle />
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
-        <p className="text-gray-500 dark:text-gray-400 mb-10">{strings.app.subtitle}</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-8">{strings.app.subtitle}</p>
+
+        <div className="flex justify-center mb-6">
+          <ModeToggle />
+        </div>
 
         <div className="flex flex-col gap-3">
           {strings.grades.map(({ grade, label, desc }) => (
