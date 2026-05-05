@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
 import { strings } from "@/lib/strings";
 import { VERSION } from "@/lib/version";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -45,6 +46,7 @@ export default function RootLayout({
         <div className="fixed bottom-2 right-2 text-[10px] font-mono text-gray-300 dark:text-gray-600 select-none pointer-events-none">
           {VERSION}
         </div>
+        <Analytics />
       </body>
     </html>
   );
