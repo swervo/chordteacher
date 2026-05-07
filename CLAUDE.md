@@ -10,7 +10,7 @@ npm run build    # production build (also type-checks)
 npm run lint     # ESLint
 ```
 
-There are no tests. The build is the primary way to catch type errors.
+Jest tests cover `src/lib/validation.ts` — run with `npx jest`. The build is the primary way to catch type errors.
 
 ## Architecture
 

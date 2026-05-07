@@ -77,6 +77,17 @@ export const quizMachine = setup({
       return validateAnswer(updated, context.chordQueue[context.currentIndex]) === "correct";
     },
 
+    practiceToggleCorrect: ({ context, event }) => {
+      if (event.type !== "TOGGLE_OPEN_MUTE") return false;
+      const current = context.stringStates[event.string];
+      let next: StringState;
+      if (current.kind === "open") next = { kind: "fret", fret: 0 };
+      else if (current.kind === "fret" && current.fret === 0) next = { kind: "muted" };
+      else next = { kind: "open" };
+      const updated = { ...context.stringStates, [event.string]: next };
+      return validateAnswer(updated, context.chordQueue[context.currentIndex]) === "correct";
+    },
+
     isLastChord: ({ context }) => context.currentIndex + 1 >= context.chordQueue.length,
   },
 
@@ -115,6 +126,28 @@ export const quizMachine = setup({
         next = { kind: "open" };
       }
       return { stringStates: { ...context.stringStates, [event.string]: next } };
+    }),
+
+    toggleOpenMuteAndValidate: assign(({ context, event }) => {
+      if (event.type !== "TOGGLE_OPEN_MUTE") return {};
+      const current = context.stringStates[event.string];
+      let next: StringState;
+      if (current.kind === "open") {
+        next = { kind: "fret", fret: 0 };
+        event.pluck(event.string, 0);
+      } else if (current.kind === "fret" && current.fret === 0) {
+        next = { kind: "muted" };
+        event.mute();
+      } else {
+        next = { kind: "open" };
+      }
+      const updated = { ...context.stringStates, [event.string]: next };
+      const result = validateAnswer(updated, context.chordQueue[context.currentIndex]);
+      return {
+        stringStates: updated,
+        validationResult: result,
+        score: result === "correct" ? context.score + 1 : context.score,
+      };
     }),
 
     recordValidation: assign(({ context }) => {
@@ -182,7 +215,11 @@ export const quizMachine = setup({
           // Practice: update + validate, stay in quiz
           { actions: "placeNoteAndValidate" },
         ],
-        TOGGLE_OPEN_MUTE: { actions: "toggleOpenMute" },
+        TOGGLE_OPEN_MUTE: [
+          { guard: "isExam", actions: "toggleOpenMute" },
+          { guard: "practiceToggleCorrect", actions: "toggleOpenMuteAndValidate", target: "success" },
+          { actions: "toggleOpenMuteAndValidate" },
+        ],
         SUBMIT: { guard: "isExam", target: "submitted", actions: "recordValidation" },
         SKIP: [
           { guard: "isLastChord", actions: ["recordSkip", "advanceToNext"], target: "complete" },
