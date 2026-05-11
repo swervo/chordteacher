@@ -4,7 +4,8 @@ import { useState, useCallback, useRef, useEffect, useImperativeHandle, forwardR
 import type { ChordDefinition, ScaleNote, StringNumber, StringStates } from "@/types/chord";
 import { useTheme } from "@/lib/useTheme";
 import NoteCircle from "@/components/NoteCircle";
-import { INTERVAL_COLORS, COLOR_GRAY } from "@/lib/colors";
+import { COLOR_GRAY } from "@/lib/colors";
+import { noteNameAtFret, colorForStringFret } from "@/lib/fretboard";
 
 const NUM_FRETS = 6;
 const NUM_ROWS = NUM_FRETS + 1; // row 0 = indicators, rows 1-6 = frets
@@ -17,29 +18,6 @@ const STRING_PX: Record<StringNumber, number> = {
 const STRING_LABELS: Record<StringNumber, string> = {
   6: "E", 5: "A", 4: "D", 3: "G", 2: "B", 1: "e",
 };
-
-const OPEN_MIDI: Record<StringNumber, number> = {
-  6: 40, 5: 45, 4: 50, 3: 55, 2: 59, 1: 64,
-};
-
-const NOTE_MIDI: Record<string, number> = {
-  C: 60, "C#": 61, Db: 61, D: 62, "D#": 63, Eb: 63,
-  E: 64, F: 65, "F#": 66, Gb: 66, G: 67, "G#": 68,
-  Ab: 68, A: 69, "A#": 70, Bb: 70, B: 71,
-};
-
-const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-
-function noteNameAtFret(string: StringNumber, fret: number): string {
-  return NOTE_NAMES[(OPEN_MIDI[string] + fret) % 12];
-}
-
-function colorForStringFret(root: string, string: StringNumber, fret: number): string {
-  const rootMidi = NOTE_MIDI[root];
-  if (rootMidi === undefined) return COLOR_GRAY;
-  const semitones = ((OPEN_MIDI[string] + fret - rootMidi) % 12 + 12) % 12;
-  return INTERVAL_COLORS[semitones] ?? COLOR_GRAY;
-}
 
 export interface FretboardHandle {
   focusFirstCell: () => void;
@@ -62,7 +40,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
   ref
 ) {
   const isScaleMode = !!scaleNotes;
-  // For moveable scales, store shifted frets so lookup uses actual display frets
+  const isMoveable = isScaleMode && scaleOffset > 0;
   const scaleNoteSet = isScaleMode
     ? new Set(scaleNotes!.map((n) => `${n.string}-${n.fret + scaleOffset}`))
     : null;
@@ -144,22 +122,17 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
       <div className="grid grid-cols-6 mb-2" role="row">
         {STRINGS_LR.map((s, col) => {
           if (isScaleMode) {
-            if (scaleOffset > 0) {
-              return (
-                <div key={s} role="gridcell" className="flex flex-col items-center">
-                  <span className="text-xs font-mono" style={{ color: C.label }}>{STRING_LABELS[s]}</span>
-                </div>
-              );
-            }
-            const isOpenScaleNote = scaleNoteSet!.has(`${s}-0`);
+            const isOpenScaleNote = !isMoveable && scaleNoteSet!.has(`${s}-0`);
             return (
-              <div key={s} role="gridcell" className="flex flex-col items-center gap-0.5">
+              <div key={s} role="gridcell" className={`flex flex-col items-center${isMoveable ? "" : " gap-0.5"}`}>
                 <span className="text-xs font-mono" style={{ color: C.label }}>{STRING_LABELS[s]}</span>
-                <NoteCircle
-                  label={isOpenScaleNote ? noteNameAtFret(s, 0) : ""}
-                  bgColor={isOpenScaleNote ? colorForStringFret(scaleRoot!, s, 0) : undefined}
-                  borderColor={isOpenScaleNote ? undefined : C.openStroke}
-                />
+                {!isMoveable && (
+                  <NoteCircle
+                    label={isOpenScaleNote ? noteNameAtFret(s, 0) : ""}
+                    bgColor={isOpenScaleNote ? colorForStringFret(scaleRoot!, s, 0) : undefined}
+                    borderColor={isOpenScaleNote ? undefined : C.openStroke}
+                  />
+                )}
               </div>
             );
           }
@@ -216,7 +189,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
       </div>
 
       {/* Nut or position label */}
-      {isScaleMode && scaleOffset > 0 ? (
+      {isMoveable ? (
         <div className="relative flex items-center" style={{ height: 20 }}>
           <span className="text-xs font-mono text-gray-400 dark:text-gray-500 pl-1">fr. {scaleOffset}</span>
           <div className="absolute bottom-0 left-[8.33%] right-[8.33%]"
@@ -231,7 +204,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
 
       <div className="flex flex-col flex-1">
       {Array.from({ length: NUM_FRETS }, (_, fi) => {
-        const fret = scaleOffset > 0 ? fi + scaleOffset : fi + 1;
+        const fret = (scaleOffset || 1) + fi;
         const isMarkerFret = fret === 3 || fret === 5 || fret === 7 || fret === 9 || fret === 12;
 
         return (

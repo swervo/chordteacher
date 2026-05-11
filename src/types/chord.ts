@@ -49,5 +49,4 @@ export interface ScaleDefinition {
   syllabus: "LCM";
   notes: ScaleNote[];
   offset?: number;
-  derivedFrom?: string;
 }

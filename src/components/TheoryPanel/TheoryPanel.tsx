@@ -1,35 +1,22 @@
 "use client";
 
+import { Note } from "tonal";
 import type { ChordDefinition, PlacedNote, StringNumber } from "@/types/chord";
 import { getChordNotes, getParentScaleNotes } from "@/lib/theory";
 import { strings } from "@/lib/strings";
 import NoteCircle from "@/components/NoteCircle";
 import { INTERVAL_COLOR_BY_LABEL, COLOR_GRAY } from "@/lib/colors";
-
-const NOTE_MIDI: Record<string, number> = {
-  C: 60, "C#": 61, Db: 61, D: 62, "D#": 63, Eb: 63,
-  E: 64, F: 65, "F#": 66, Gb: 66, G: 67, "G#": 68,
-  Ab: 68, A: 69, "A#": 70, Bb: 70, B: 71,
-};
-
-const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-
-const OPEN_MIDI: Record<StringNumber, number> = {
-  6: 40, 5: 45, 4: 50, 3: 55, 2: 59, 1: 64,
-};
+import { noteNameAtFret } from "@/lib/fretboard";
 
 const SEMITONE_TO_LABEL: Record<number, string> = {
   0: "R", 2: "2", 3: "m3", 4: "3", 5: "4", 7: "5", 9: "6", 10: "7", 11: "maj7",
 };
 
 function semitoneLabel(root: string, note: string): string {
-  const diff = (NOTE_MIDI[note] ?? 0) - (NOTE_MIDI[root] ?? 0);
-  const semitones = ((diff % 12) + 12) % 12;
+  const rootMidi = Note.midi(`${root}4`) ?? 0;
+  const noteMidi = Note.midi(`${note}4`) ?? 0;
+  const semitones = ((noteMidi - rootMidi) % 12 + 12) % 12;
   return SEMITONE_TO_LABEL[semitones] ?? "?";
-}
-
-function pitchClassFromFret(string: StringNumber, fret: number): string {
-  return NOTE_NAMES[(OPEN_MIDI[string] + fret) % 12];
 }
 
 interface TheoryPanelProps {
@@ -50,7 +37,7 @@ export default function TheoryPanel({ chord, placedNotes, hintsEnabled = true }:
       (f) => f.string === p.string && f.fret === p.fret && !f.muted
     );
     if (canonical) {
-      checkedPitchClasses.add(pitchClassFromFret(p.string as StringNumber, p.fret));
+      checkedPitchClasses.add(noteNameAtFret(p.string as StringNumber, p.fret));
     }
   }
 

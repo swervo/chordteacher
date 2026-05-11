@@ -52,10 +52,12 @@ const shapeMap = new Map<string, ScaleNote[]>(
 );
 
 function parseScales(raw: RawScale[]): ScaleDefinition[] {
-  return raw.map((s) => ({
-    ...s,
-    notes: s.derivedFrom ? shapeMap.get(s.derivedFrom)! : s.notes!,
-  }));
+  return raw.map(({ derivedFrom, notes, ...rest }) => {
+    const resolvedNotes = derivedFrom
+      ? shapeMap.get(derivedFrom) ?? (() => { throw new Error(`scale-shapes.json: unknown shape id "${derivedFrom}"`); })()
+      : notes!;
+    return { ...rest, notes: resolvedNotes };
+  });
 }
 
 const ALL_SCALES: ScaleDefinition[] = [
