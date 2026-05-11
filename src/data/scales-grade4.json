@@ -71,5 +71,9 @@
       {"string": 2, "fret": 3},
       {"string": 1, "fret": 0}
     ]
-  }
+  },
+  { "id": "g-major-grade4", "name": "G Major", "root": "G", "quality": "major", "grade": 4, "syllabus": "LCM", "derivedFrom": "major-shape-1", "offset": 2 },
+  { "id": "a-major-grade4", "name": "A Major", "root": "A", "quality": "major", "grade": 4, "syllabus": "LCM", "derivedFrom": "major-shape-1", "offset": 4 },
+  { "id": "c-major-grade4", "name": "C Major", "root": "C", "quality": "major", "grade": 4, "syllabus": "LCM", "derivedFrom": "major-shape-1", "offset": 7 },
+  { "id": "d-major-grade4", "name": "D Major", "root": "D", "quality": "major", "grade": 4, "syllabus": "LCM", "derivedFrom": "major-shape-1", "offset": 9 }
 ]

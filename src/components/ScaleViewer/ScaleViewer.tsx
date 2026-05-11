@@ -38,7 +38,7 @@ export default function ScaleViewer({ scales }: ScaleViewerProps) {
       </div>
 
       <div className="flex-1 min-h-0 w-full max-w-sm mx-auto">
-        <Fretboard scaleNotes={scale.notes} scaleRoot={scale.root} />
+        <Fretboard scaleNotes={scale.notes} scaleRoot={scale.root} scaleOffset={scale.offset ?? 0} />
       </div>
     </div>
   );

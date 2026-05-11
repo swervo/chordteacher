@@ -6,8 +6,8 @@ import { useTheme } from "@/lib/useTheme";
 import NoteCircle from "@/components/NoteCircle";
 import { INTERVAL_COLORS, COLOR_GRAY } from "@/lib/colors";
 
-const NUM_FRETS = 5;
-const NUM_ROWS = NUM_FRETS + 1; // row 0 = indicators, rows 1-5 = frets
+const NUM_FRETS = 6;
+const NUM_ROWS = NUM_FRETS + 1; // row 0 = indicators, rows 1-6 = frets
 const STRINGS_LR: StringNumber[] = [6, 5, 4, 3, 2, 1];
 
 const STRING_PX: Record<StringNumber, number> = {
@@ -54,14 +54,18 @@ interface FretboardProps {
   hintsEnabled?: boolean;
   scaleNotes?: ScaleNote[];
   scaleRoot?: string;
+  scaleOffset?: number;
 }
 
 const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard(
-  { chord, stringStates, onFretClick, onToggleOpenMute, disabled = false, hintsEnabled = true, scaleNotes, scaleRoot },
+  { chord, stringStates, onFretClick, onToggleOpenMute, disabled = false, hintsEnabled = true, scaleNotes, scaleRoot, scaleOffset = 0 },
   ref
 ) {
   const isScaleMode = !!scaleNotes;
-  const scaleNoteSet = isScaleMode ? new Set(scaleNotes!.map((n) => `${n.string}-${n.fret}`)) : null;
+  // For moveable scales, store shifted frets so lookup uses actual display frets
+  const scaleNoteSet = isScaleMode
+    ? new Set(scaleNotes!.map((n) => `${n.string}-${n.fret + scaleOffset}`))
+    : null;
   const { isDark } = useTheme();
   const [focusedCell, setFocusedCell] = useState<{ row: number; col: number } | null>(null);
 
@@ -140,6 +144,13 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
       <div className="grid grid-cols-6 mb-2" role="row">
         {STRINGS_LR.map((s, col) => {
           if (isScaleMode) {
+            if (scaleOffset > 0) {
+              return (
+                <div key={s} role="gridcell" className="flex flex-col items-center">
+                  <span className="text-xs font-mono" style={{ color: C.label }}>{STRING_LABELS[s]}</span>
+                </div>
+              );
+            }
             const isOpenScaleNote = scaleNoteSet!.has(`${s}-0`);
             return (
               <div key={s} role="gridcell" className="flex flex-col items-center gap-0.5">
@@ -204,16 +215,24 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
         })}
       </div>
 
-      {/* Nut */}
-      <div className="relative" style={{ height: 4 }}>
-        <div className="absolute top-0 left-[8.33%] right-[8.33%]"
-          style={{ borderTop: `5px solid ${C.nut}` }} />
-      </div>
+      {/* Nut or position label */}
+      {isScaleMode && scaleOffset > 0 ? (
+        <div className="relative flex items-center" style={{ height: 20 }}>
+          <span className="text-xs font-mono text-gray-400 dark:text-gray-500 pl-1">fr. {scaleOffset}</span>
+          <div className="absolute bottom-0 left-[8.33%] right-[8.33%]"
+            style={{ borderBottom: `1px solid ${C.fret}` }} />
+        </div>
+      ) : (
+        <div className="relative" style={{ height: 4 }}>
+          <div className="absolute top-0 left-[8.33%] right-[8.33%]"
+            style={{ borderTop: `5px solid ${C.nut}` }} />
+        </div>
+      )}
 
       <div className="flex flex-col flex-1">
       {Array.from({ length: NUM_FRETS }, (_, fi) => {
-        const fret = fi + 1;
-        const isMarkerFret = fret === 3 || fret === 5;
+        const fret = scaleOffset > 0 ? fi + scaleOffset : fi + 1;
+        const isMarkerFret = fret === 3 || fret === 5 || fret === 7 || fret === 9 || fret === 12;
 
         return (
           <div

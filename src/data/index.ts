@@ -3,6 +3,8 @@ import grade1 from "./chords-grade1.json";
 import grade2 from "./chords-grade2.json";
 import grade3 from "./chords-grade3.json";
 import grade4 from "./chords-grade4.json";
+import scaleShapes from "./scale-shapes.json";
+import scales1 from "./scales-grade1.json";
 import scales2 from "./scales-grade2.json";
 import scales3 from "./scales-grade3.json";
 import scales4 from "./scales-grade4.json";
@@ -42,12 +44,25 @@ export function shuffleChords(chords: ChordDefinition[]): ChordDefinition[] {
   return [...chords].sort(() => Math.random() - 0.5);
 }
 
-type RawScale = Omit<ScaleDefinition, "notes"> & { notes: ScaleNote[] };
+type RawShape = { id: string; notes: ScaleNote[] };
+type RawScale = Omit<ScaleDefinition, "notes"> & { notes?: ScaleNote[]; derivedFrom?: string };
+
+const shapeMap = new Map<string, ScaleNote[]>(
+  (scaleShapes as RawShape[]).map((s) => [s.id, s.notes])
+);
+
+function parseScales(raw: RawScale[]): ScaleDefinition[] {
+  return raw.map((s) => ({
+    ...s,
+    notes: s.derivedFrom ? shapeMap.get(s.derivedFrom)! : s.notes!,
+  }));
+}
 
 const ALL_SCALES: ScaleDefinition[] = [
-  ...(scales2 as RawScale[]),
-  ...(scales3 as RawScale[]),
-  ...(scales4 as RawScale[]),
+  ...parseScales(scales1 as RawScale[]),
+  ...parseScales(scales2 as RawScale[]),
+  ...parseScales(scales3 as RawScale[]),
+  ...parseScales(scales4 as RawScale[]),
 ];
 
 export function getScalesForGrade(grade: GradeNumber): ScaleDefinition[] {

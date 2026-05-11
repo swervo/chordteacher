@@ -48,4 +48,6 @@ export interface ScaleDefinition {
   grade: GradeNumber;
   syllabus: "LCM";
   notes: ScaleNote[];
+  offset?: number;
+  derivedFrom?: string;
 }
