@@ -130,7 +130,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
   );
 
   return (
-    <div className="w-full select-none" role="grid" aria-label="Guitar fretboard">
+    <div className="w-full h-full flex flex-col select-none" role="grid" aria-label="Guitar fretboard">
 
       {/* Indicator row */}
       <div className="grid grid-cols-6 mb-2" role="row">
@@ -192,6 +192,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
           style={{ borderTop: `5px solid ${C.nut}` }} />
       </div>
 
+      <div className="flex flex-col flex-1">
       {Array.from({ length: NUM_FRETS }, (_, fi) => {
         const fret = fi + 1;
         const isMarkerFret = fret === 3 || fret === 5;
@@ -200,8 +201,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
           <div
             key={fret}
             role="row"
-            className="relative grid grid-cols-6"
-            style={{ height: 68 }}
+            className="relative grid grid-cols-6 flex-1 min-h-[44px] max-h-[80px]"
           >
             {/* Fret line */}
             <div className="absolute bottom-0 left-[8.33%] right-[8.33%]"
@@ -250,6 +250,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
           </div>
         );
       })}
+      </div>
     </div>
   );
 });

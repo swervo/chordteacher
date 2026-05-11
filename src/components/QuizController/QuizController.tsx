@@ -69,7 +69,7 @@ export default function QuizController({ grade, mode = "practice" }: { grade: Gr
   const isBusy = state.phase === "success" || isSubmitted;
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto p-3">
+    <div className="flex-1 min-h-0 flex flex-col items-center gap-6 w-full max-w-2xl mx-auto p-3">
       <AudioEngine onReady={setAudioFns} />
 
       <div className="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
@@ -84,8 +84,8 @@ export default function QuizController({ grade, mode = "practice" }: { grade: Gr
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">{chord.name}</h1>
       </div>
 
-      <div className="w-full max-w-sm mx-auto flex flex-col gap-6">
-        <div className="relative">
+      <div className="flex-1 min-h-0 w-full max-w-sm mx-auto flex flex-col gap-6">
+        <div className="relative flex-1 min-h-0">
           <Fretboard
             ref={fretboardRef}
             chord={chord}
