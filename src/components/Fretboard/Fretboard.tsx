@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
-import type { ChordDefinition, StringNumber, StringStates } from "@/types/chord";
+import type { ChordDefinition, ScaleNote, StringNumber, StringStates } from "@/types/chord";
 import { useTheme } from "@/lib/useTheme";
 import NoteCircle from "@/components/NoteCircle";
 import { INTERVAL_COLORS, COLOR_GRAY } from "@/lib/colors";
@@ -46,18 +46,22 @@ export interface FretboardHandle {
 }
 
 interface FretboardProps {
-  chord: ChordDefinition;
-  stringStates: StringStates;
-  onFretClick: (string: StringNumber, fret: number) => void;
-  onToggleOpenMute: (string: StringNumber) => void;
+  chord?: ChordDefinition;
+  stringStates?: StringStates;
+  onFretClick?: (string: StringNumber, fret: number) => void;
+  onToggleOpenMute?: (string: StringNumber) => void;
   disabled?: boolean;
   hintsEnabled?: boolean;
+  scaleNotes?: ScaleNote[];
+  scaleRoot?: string;
 }
 
 const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard(
-  { chord, stringStates, onFretClick, onToggleOpenMute, disabled = false, hintsEnabled = true },
+  { chord, stringStates, onFretClick, onToggleOpenMute, disabled = false, hintsEnabled = true, scaleNotes, scaleRoot },
   ref
 ) {
+  const isScaleMode = !!scaleNotes;
+  const scaleNoteSet = isScaleMode ? new Set(scaleNotes!.map((n) => `${n.string}-${n.fret}`)) : null;
   const { isDark } = useTheme();
   const [focusedCell, setFocusedCell] = useState<{ row: number; col: number } | null>(null);
 
@@ -77,7 +81,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
   // Reset focus position when chord changes
   useEffect(() => {
     setFocusedCell(null);
-  }, [chord.id]);
+  }, [chord?.id]);
 
   useImperativeHandle(ref, () => ({
     focusFirstCell: () => {
@@ -118,13 +122,13 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
     label: "#9ca3af",
   };
 
-  const validPositions = new Set(
-    chord.fingerings.flatMap((fingering) =>
+  const validPositions = isScaleMode ? null : new Set(
+    chord!.fingerings.flatMap((fingering) =>
       fingering.filter((f) => !f.muted && f.fret !== null).map((f) => `${f.string}-${f.fret}`)
     )
   );
-  const validOpenStrings = new Set(
-    chord.fingerings.flatMap((fingering) =>
+  const validOpenStrings = isScaleMode ? null : new Set(
+    chord!.fingerings.flatMap((fingering) =>
       fingering.filter((f) => f.fret === 0).map((f) => f.string)
     )
   );
@@ -135,7 +139,21 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
       {/* Indicator row */}
       <div className="grid grid-cols-6 mb-2" role="row">
         {STRINGS_LR.map((s, col) => {
-          const state = stringStates[s];
+          if (isScaleMode) {
+            const isOpenScaleNote = scaleNoteSet!.has(`${s}-0`);
+            return (
+              <div key={s} role="gridcell" className="flex flex-col items-center gap-0.5">
+                <span className="text-xs font-mono" style={{ color: C.label }}>{STRING_LABELS[s]}</span>
+                <NoteCircle
+                  label={isOpenScaleNote ? noteNameAtFret(s, 0) : ""}
+                  bgColor={isOpenScaleNote ? colorForStringFret(scaleRoot!, s, 0) : undefined}
+                  borderColor={isOpenScaleNote ? undefined : C.openStroke}
+                />
+              </div>
+            );
+          }
+
+          const state = stringStates![s];
           const isSelectedOpen = state.kind === "fret" && state.fret === 0;
           const isMuted = state.kind === "muted";
           const isFrettedPlaced = state.kind === "fret" && state.fret > 0;
@@ -146,9 +164,9 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
           let dashed = false;
 
           if (isSelectedOpen) {
-            const isCorrect = validOpenStrings.has(s);
+            const isCorrect = validOpenStrings!.has(s);
             label = noteNameAtFret(s, 0);
-            bgColor = hintsEnabled && isCorrect ? colorForStringFret(chord.root, s, 0) : COLOR_GRAY;
+            bgColor = hintsEnabled && isCorrect ? colorForStringFret(chord!.root, s, 0) : COLOR_GRAY;
             borderColor = undefined;
           } else if (isMuted) {
             label = "×";
@@ -170,7 +188,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
                 tabIndex={!disabled && ((!focusedCell && col === 0) || (focusedCell?.row === 0 && focusedCell?.col === col)) ? 0 : -1}
                 aria-label={`String ${STRING_LABELS[s]}, ${stateDesc}`}
                 className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                onClick={() => { lastFocusSource.current = "mouse"; onToggleOpenMute(s); }}
+                onClick={() => { lastFocusSource.current = "mouse"; onToggleOpenMute!(s); }}
                 onFocus={() => setFocusedCell({ row: 0, col })}
                 onKeyDown={(e) => handleKeyDown(e, 0, col)}
               >
@@ -215,9 +233,29 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
             )}
 
             {STRINGS_LR.map((s, col) => {
-              const state = stringStates[s];
+              if (isScaleMode) {
+                const hasNote = scaleNoteSet!.has(`${s}-${fret}`);
+                return (
+                  <div key={s} role="gridcell" className="relative flex items-center justify-center">
+                    <div
+                      className="absolute inset-y-0 left-1/2 -translate-x-1/2 pointer-events-none"
+                      style={{ width: STRING_PX[s], backgroundColor: C.string }}
+                    />
+                    {hasNote && (
+                      <div className="relative z-10">
+                        <NoteCircle
+                          label={noteNameAtFret(s, fret)}
+                          bgColor={colorForStringFret(scaleRoot!, s, fret)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              const state = stringStates![s];
               const isPlacedHere = state.kind === "fret" && state.fret === fret;
-              const isCorrect = isPlacedHere && validPositions.has(`${s}-${fret}`);
+              const isCorrect = isPlacedHere && validPositions!.has(`${s}-${fret}`);
               const stringColor = state.kind === "muted" ? C.stringMuted : C.string;
 
               return (
@@ -233,14 +271,14 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
                     aria-label={`String ${STRING_LABELS[s]}, fret ${fret}`}
                     aria-pressed={isPlacedHere}
                     className="absolute inset-0 w-full h-full flex items-center justify-center hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70"
-                    onClick={() => { lastFocusSource.current = "mouse"; onFretClick(s, fret); }}
+                    onClick={() => { lastFocusSource.current = "mouse"; onFretClick!(s, fret); }}
                     onFocus={() => setFocusedCell({ row: fret, col })}
                     onKeyDown={(e) => handleKeyDown(e, fret, col)}
                   >
                     {isPlacedHere && (
                       <NoteCircle
                         label={noteNameAtFret(s, fret)}
-                        bgColor={hintsEnabled && isCorrect ? colorForStringFret(chord.root, s, fret) : COLOR_GRAY}
+                        bgColor={hintsEnabled && isCorrect ? colorForStringFret(chord!.root, s, fret) : COLOR_GRAY}
                       />
                     )}
                   </button>

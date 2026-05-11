@@ -1,0 +1,77 @@
+[
+  {
+    "id": "g-major-grade3",
+    "name": "G Major",
+    "root": "G",
+    "quality": "major",
+    "grade": 3,
+    "syllabus": "LCM",
+    "notes": [
+      {"string": 6, "fret": 3},
+      {"string": 5, "fret": 0},
+      {"string": 5, "fret": 2},
+      {"string": 5, "fret": 3},
+      {"string": 4, "fret": 0},
+      {"string": 4, "fret": 2},
+      {"string": 4, "fret": 4},
+      {"string": 3, "fret": 0},
+      {"string": 3, "fret": 2},
+      {"string": 2, "fret": 0},
+      {"string": 2, "fret": 1},
+      {"string": 2, "fret": 3},
+      {"string": 1, "fret": 0},
+      {"string": 1, "fret": 2},
+      {"string": 1, "fret": 3}
+    ]
+  },
+  {
+    "id": "a-natural-minor-grade3",
+    "name": "A Natural Minor",
+    "root": "A",
+    "quality": "minor",
+    "grade": 3,
+    "syllabus": "LCM",
+    "notes": [
+      {"string": 5, "fret": 0},
+      {"string": 5, "fret": 2},
+      {"string": 5, "fret": 3},
+      {"string": 4, "fret": 0},
+      {"string": 4, "fret": 2},
+      {"string": 4, "fret": 3},
+      {"string": 3, "fret": 0},
+      {"string": 3, "fret": 2},
+      {"string": 2, "fret": 0},
+      {"string": 2, "fret": 1},
+      {"string": 2, "fret": 3},
+      {"string": 1, "fret": 0},
+      {"string": 1, "fret": 1},
+      {"string": 1, "fret": 3},
+      {"string": 1, "fret": 5}
+    ]
+  },
+  {
+    "id": "a-mixolydian-grade3",
+    "name": "A Mixolydian",
+    "root": "A",
+    "quality": "mixolydian",
+    "grade": 3,
+    "syllabus": "LCM",
+    "notes": [
+      {"string": 5, "fret": 0},
+      {"string": 5, "fret": 2},
+      {"string": 5, "fret": 4},
+      {"string": 4, "fret": 0},
+      {"string": 4, "fret": 2},
+      {"string": 4, "fret": 4},
+      {"string": 3, "fret": 0},
+      {"string": 3, "fret": 2},
+      {"string": 2, "fret": 0},
+      {"string": 2, "fret": 2},
+      {"string": 2, "fret": 3},
+      {"string": 1, "fret": 0},
+      {"string": 1, "fret": 2},
+      {"string": 1, "fret": 3},
+      {"string": 1, "fret": 5}
+    ]
+  }
+]

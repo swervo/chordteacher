@@ -34,3 +34,18 @@ export interface PlacedNote {
 }
 
 export type ValidationResult = "correct" | "incorrect" | "incomplete";
+
+export interface ScaleNote {
+  string: StringNumber;
+  fret: number;
+}
+
+export interface ScaleDefinition {
+  id: string;
+  name: string;
+  root: string;
+  quality: string;
+  grade: GradeNumber;
+  syllabus: "LCM";
+  notes: ScaleNote[];
+}

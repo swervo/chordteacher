@@ -1,0 +1,75 @@
+[
+  {
+    "id": "e-major-grade4",
+    "name": "E Major",
+    "root": "E",
+    "quality": "major",
+    "grade": 4,
+    "syllabus": "LCM",
+    "notes": [
+      {"string": 6, "fret": 0},
+      {"string": 6, "fret": 2},
+      {"string": 6, "fret": 4},
+      {"string": 5, "fret": 0},
+      {"string": 5, "fret": 2},
+      {"string": 5, "fret": 4},
+      {"string": 4, "fret": 1},
+      {"string": 4, "fret": 2},
+      {"string": 4, "fret": 4},
+      {"string": 3, "fret": 1},
+      {"string": 3, "fret": 2},
+      {"string": 2, "fret": 0},
+      {"string": 2, "fret": 2},
+      {"string": 2, "fret": 4},
+      {"string": 1, "fret": 0}
+    ]
+  },
+  {
+    "id": "e-natural-minor-grade4",
+    "name": "E Natural Minor",
+    "root": "E",
+    "quality": "minor",
+    "grade": 4,
+    "syllabus": "LCM",
+    "notes": [
+      {"string": 6, "fret": 0},
+      {"string": 6, "fret": 2},
+      {"string": 6, "fret": 3},
+      {"string": 5, "fret": 0},
+      {"string": 5, "fret": 2},
+      {"string": 5, "fret": 3},
+      {"string": 4, "fret": 0},
+      {"string": 4, "fret": 2},
+      {"string": 4, "fret": 4},
+      {"string": 3, "fret": 0},
+      {"string": 3, "fret": 2},
+      {"string": 2, "fret": 0},
+      {"string": 2, "fret": 1},
+      {"string": 2, "fret": 3},
+      {"string": 1, "fret": 0}
+    ]
+  },
+  {
+    "id": "e-blues-grade4",
+    "name": "E Blues",
+    "root": "E",
+    "quality": "blues",
+    "grade": 4,
+    "syllabus": "LCM",
+    "notes": [
+      {"string": 6, "fret": 0},
+      {"string": 6, "fret": 3},
+      {"string": 5, "fret": 0},
+      {"string": 5, "fret": 1},
+      {"string": 5, "fret": 2},
+      {"string": 4, "fret": 0},
+      {"string": 4, "fret": 2},
+      {"string": 3, "fret": 0},
+      {"string": 3, "fret": 2},
+      {"string": 3, "fret": 3},
+      {"string": 2, "fret": 0},
+      {"string": 2, "fret": 3},
+      {"string": 1, "fret": 0}
+    ]
+  }
+]

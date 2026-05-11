@@ -1,0 +1,52 @@
+[
+  {
+    "id": "a-major-grade2",
+    "name": "A Major",
+    "root": "A",
+    "quality": "major",
+    "grade": 2,
+    "syllabus": "LCM",
+    "notes": [
+      {"string": 5, "fret": 0},
+      {"string": 5, "fret": 2},
+      {"string": 5, "fret": 4},
+      {"string": 4, "fret": 0},
+      {"string": 4, "fret": 2},
+      {"string": 4, "fret": 4},
+      {"string": 3, "fret": 1},
+      {"string": 3, "fret": 2},
+      {"string": 2, "fret": 0},
+      {"string": 2, "fret": 2},
+      {"string": 2, "fret": 3},
+      {"string": 1, "fret": 0},
+      {"string": 1, "fret": 2},
+      {"string": 1, "fret": 4},
+      {"string": 1, "fret": 5}
+    ]
+  },
+  {
+    "id": "a-dorian-grade2",
+    "name": "A Dorian",
+    "root": "A",
+    "quality": "dorian",
+    "grade": 2,
+    "syllabus": "LCM",
+    "notes": [
+      {"string": 5, "fret": 0},
+      {"string": 5, "fret": 2},
+      {"string": 5, "fret": 3},
+      {"string": 4, "fret": 0},
+      {"string": 4, "fret": 2},
+      {"string": 4, "fret": 4},
+      {"string": 3, "fret": 0},
+      {"string": 3, "fret": 2},
+      {"string": 2, "fret": 0},
+      {"string": 2, "fret": 1},
+      {"string": 2, "fret": 3},
+      {"string": 1, "fret": 0},
+      {"string": 1, "fret": 2},
+      {"string": 1, "fret": 3},
+      {"string": 1, "fret": 5}
+    ]
+  }
+]

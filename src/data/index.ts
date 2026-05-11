@@ -1,8 +1,11 @@
-import type { ChordDefinition, GradeNumber, StringFingering, StringNumber } from "@/types/chord";
+import type { ChordDefinition, GradeNumber, ScaleDefinition, ScaleNote, StringFingering, StringNumber } from "@/types/chord";
 import grade1 from "./chords-grade1.json";
 import grade2 from "./chords-grade2.json";
 import grade3 from "./chords-grade3.json";
 import grade4 from "./chords-grade4.json";
+import scales2 from "./scales-grade2.json";
+import scales3 from "./scales-grade3.json";
+import scales4 from "./scales-grade4.json";
 
 // Tab string format: "E-A-D-G-B-e" (string 6 to string 1, low to high)
 // Values: digit = fret number, x = muted
@@ -37,4 +40,16 @@ export function getChordsForGrade(grade: GradeNumber): ChordDefinition[] {
 
 export function shuffleChords(chords: ChordDefinition[]): ChordDefinition[] {
   return [...chords].sort(() => Math.random() - 0.5);
+}
+
+type RawScale = Omit<ScaleDefinition, "notes"> & { notes: ScaleNote[] };
+
+const ALL_SCALES: ScaleDefinition[] = [
+  ...(scales2 as RawScale[]),
+  ...(scales3 as RawScale[]),
+  ...(scales4 as RawScale[]),
+];
+
+export function getScalesForGrade(grade: GradeNumber): ScaleDefinition[] {
+  return ALL_SCALES.filter((s) => s.grade === grade);
 }
