@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import type { GradeNumber } from "@/types/chord";
 import { getScalesForGrade } from "@/data/index";
-import ScaleViewer from "@/components/ScaleViewer/ScaleViewer";
+import ScalesPageClient from "@/components/ScaleViewer/ScalesPageClient";
 import ThemeToggle from "@/components/ThemeToggle";
 
 interface Props {
@@ -24,7 +24,7 @@ export default async function ScalesPage({ params }: Props) {
           </a>
           <ThemeToggle />
         </div>
-        <ScaleViewer scales={scales} />
+        <ScalesPageClient scales={scales} />
       </div>
     </main>
   );

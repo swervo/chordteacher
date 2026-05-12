@@ -18,7 +18,7 @@ export default function ChordsHome() {
         <p className="text-gray-500 dark:text-gray-400 mb-6">Select a grade to start the quiz</p>
 
         <div className="flex justify-center mb-6">
-          <ModeToggle />
+          <ModeToggle topic="chords" />
         </div>
 
         <div className="flex flex-col gap-3">

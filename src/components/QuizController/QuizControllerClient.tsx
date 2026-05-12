@@ -7,6 +7,6 @@ import { useMode } from "@/lib/useMode";
 const QuizController = dynamic(() => import("./QuizController"), { ssr: false });
 
 export default function QuizControllerClient({ grade }: { grade: GradeNumber }) {
-  const { mode } = useMode();
+  const { mode } = useMode("chords");
   return <QuizController grade={grade} mode={mode} />;
 }

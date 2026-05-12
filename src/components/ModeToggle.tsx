@@ -2,8 +2,12 @@
 
 import { useMode } from "@/lib/useMode";
 
-export default function ModeToggle() {
-  const { mode, toggleMode } = useMode();
+interface ModeToggleProps {
+  topic?: string;
+}
+
+export default function ModeToggle({ topic }: ModeToggleProps) {
+  const { mode, toggleMode } = useMode(topic);
   const isExam = mode === "exam";
 
   return (

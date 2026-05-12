@@ -1,4 +1,4 @@
-import type { ChordDefinition, PlacedNote, StringStates, ValidationResult } from "@/types/chord";
+import type { ChordDefinition, PlacedNote, ScaleDefinition, StringNumber, StringStates, ValidationResult } from "@/types/chord";
 import { pitchClassAtFret } from "./fretboard";
 import { getChordNotes } from "./theory";
 
@@ -61,6 +61,38 @@ export function validateAnswer(
   if (results.every((r) => r === "incomplete")) return "incomplete";
   if (results.some((r) => r === "incomplete") && results.every((r) => r !== "incorrect")) return "incomplete";
   return "incorrect";
+}
+
+export function validateScaleAnswer(
+  states: StringStates,
+  scale: ScaleDefinition,
+  rootNotes: Set<string>
+): ValidationResult {
+  // Build canonical set of non-root notes the student must place
+  const canonical = scale.notes.filter((n) => !rootNotes.has(`${n.string}-${n.fret}`));
+
+  for (const note of canonical) {
+    const state = states[note.string as StringNumber];
+    const placed =
+      note.fret === 0
+        ? state.kind === "open" || (state.kind === "fret" && state.fret === 0)
+        : state.kind === "fret" && state.fret === note.fret;
+    if (!placed) return "incomplete";
+  }
+
+  // Check for any incorrectly placed notes (not in canonical scale)
+  const allCanonicalKeys = new Set(scale.notes.map((n) => `${n.string}-${n.fret}`));
+  for (const [strKey, state] of Object.entries(states) as [string, StringStates[StringNumber]][]) {
+    if (state.kind === "open") {
+      const key = `${strKey}-0`;
+      if (!allCanonicalKeys.has(key)) return "incorrect";
+    } else if (state.kind === "fret") {
+      const key = `${strKey}-${state.fret}`;
+      if (!allCanonicalKeys.has(key)) return "incorrect";
+    }
+  }
+
+  return "correct";
 }
 
 export function getPlacedIntervalLabel(

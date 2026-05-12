@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import ModeToggle from "@/components/ModeToggle";
 import { strings } from "@/lib/strings";
 
 export default function ScalesHome() {
@@ -14,7 +15,11 @@ export default function ScalesHome() {
         </div>
 
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mt-4 mb-1">Scales</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-8">Select a grade to view scale shapes</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">Select a grade to view scale shapes</p>
+
+        <div className="flex justify-center mb-6">
+          <ModeToggle topic="scales" />
+        </div>
 
         <div className="flex flex-col gap-3">
           {strings.scaleGrades.map(({ grade, label, desc }) => (

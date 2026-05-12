@@ -1,5 +1,6 @@
-import type { StringFingering, StringNumber } from "@/types/chord";
+import type { ScaleNote, StringFingering, StringNumber } from "@/types/chord";
 import { noteAtFret } from "./fretboard";
+import { Note } from "tonal";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let player: any = null;
@@ -24,6 +25,24 @@ export async function strumChord(fingering: StringFingering[]): Promise<void> {
   sorted.forEach((f, i) => {
     const note = noteAtFret(f.string as StringNumber, f.fret as number);
     setTimeout(() => p.play(note), i * STAGGER_MS);
+  });
+}
+
+const SCALE_STAGGER_MS = 150;
+
+export async function playScale(notes: ScaleNote[], root: string): Promise<void> {
+  const p = await getPlayer();
+  // Get MIDI value for each note
+  const withMidi = notes
+    .map((n) => ({ note: noteAtFret(n.string, n.fret), midi: Note.midi(noteAtFret(n.string, n.fret)) ?? 0 }))
+    .sort((a, b) => a.midi - b.midi);
+
+  // Find the root MIDI and play one ascending octave from lowest root
+  const rootMidi = withMidi.find((n) => Note.pitchClass(n.note) === root)?.midi ?? withMidi[0].midi;
+  const octave = withMidi.filter((n) => n.midi >= rootMidi && n.midi <= rootMidi + 12);
+
+  octave.forEach(({ note }, i) => {
+    setTimeout(() => p.play(note), i * SCALE_STAGGER_MS);
   });
 }
 
