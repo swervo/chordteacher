@@ -5,11 +5,22 @@ export const strings = {
     helpText: "Click frets on the neck · Theory panel shows scale context",
     metaDescription: "LCM Acoustic Guitar interactive chord quiz",
   },
+  topics: [
+    { id: "chords", label: "Chords", desc: "Interactive chord quiz with theory feedback" },
+    { id: "scales", label: "Scales", desc: "Moveable scale shapes across all grades" },
+    { id: "arpeggios", label: "Arpeggios", desc: "Coming soon" },
+  ],
   grades: [
     { grade: 1, label: "Grade 1", desc: "A, E, D7, A7, E7, B7" },
     { grade: 2, label: "Grade 2", desc: "F, Am7, Em7, Dm7, C7, G7, maj7s" },
     { grade: 3, label: "Grade 3", desc: "sus2 and sus4 chords" },
     { grade: 4, label: "Grade 4", desc: "6th and add9 chords" },
+  ],
+  scaleGrades: [
+    { grade: 1, label: "Grade 1", desc: "D Major, A Natural Minor" },
+    { grade: 2, label: "Grade 2", desc: "A Major, A Dorian" },
+    { grade: 3, label: "Grade 3", desc: "G Major, A Natural Minor, A Mixolydian" },
+    { grade: 4, label: "Grade 4", desc: "E Major, E Natural Minor, E Blues, G, A, C, D Major" },
   ],
   quiz: {
     instruction: "Play this chord",

@@ -1,22 +1,31 @@
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import ModeToggle from "@/components/ModeToggle";
 import { strings } from "@/lib/strings";
 
-export default function Home() {
+export default function ChordsHome() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-8 transition-colors">
       <div className="max-w-md w-full">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{strings.app.title}</h1>
+          <a href="/" className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-sm transition-colors">
+            ← Back
+          </a>
           <ThemeToggle />
         </div>
-        <p className="text-gray-500 dark:text-gray-400 mb-8">{strings.app.subtitle}</p>
+
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mt-4 mb-1">Chords</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">Select a grade to start the quiz</p>
+
+        <div className="flex justify-center mb-6">
+          <ModeToggle />
+        </div>
 
         <div className="flex flex-col gap-3">
-          {strings.topics.map(({ id, label, desc }) => (
+          {strings.grades.map(({ grade, label, desc }) => (
             <Link
-              key={id}
-              href={`/${id}`}
+              key={grade}
+              href={`/quiz/${grade}`}
               className="block p-5 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors group border border-gray-200 dark:border-transparent"
             >
               <div className="flex items-center justify-between">
@@ -31,6 +40,8 @@ export default function Home() {
             </Link>
           ))}
         </div>
+
+        <p className="text-gray-400 dark:text-gray-600 text-xs mt-10 text-center">{strings.app.helpText}</p>
       </div>
     </main>
   );
