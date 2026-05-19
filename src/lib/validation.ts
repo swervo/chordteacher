@@ -1,4 +1,5 @@
-import type { ChordDefinition, PlacedNote, ScaleDefinition, StringNumber, StringStates, ValidationResult } from "@/types/chord";
+import { Note } from "tonal";
+import type { ChordDefinition, PlacedNote, ScaleDefinition, StringStates, ValidationResult } from "@/types/chord";
 import { pitchClassAtFret } from "./fretboard";
 import { getChordNotes } from "./theory";
 
@@ -63,35 +64,20 @@ export function validateAnswer(
   return "incorrect";
 }
 
-export function validateScaleAnswer(
-  states: StringStates,
+export function validateScalePlaced(
+  placed: Set<string>,
   scale: ScaleDefinition,
   rootNotes: Set<string>
 ): ValidationResult {
-  // Build canonical set of non-root notes the student must place
+  const allKeys = new Set(scale.notes.map((n) => `${n.string}-${n.fret}`));
   const canonical = scale.notes.filter((n) => !rootNotes.has(`${n.string}-${n.fret}`));
 
   for (const note of canonical) {
-    const state = states[note.string as StringNumber];
-    const placed =
-      note.fret === 0
-        ? state.kind === "open" || (state.kind === "fret" && state.fret === 0)
-        : state.kind === "fret" && state.fret === note.fret;
-    if (!placed) return "incomplete";
+    if (!placed.has(`${note.string}-${note.fret}`)) return "incomplete";
   }
-
-  // Check for any incorrectly placed notes (not in canonical scale)
-  const allCanonicalKeys = new Set(scale.notes.map((n) => `${n.string}-${n.fret}`));
-  for (const [strKey, state] of Object.entries(states) as [string, StringStates[StringNumber]][]) {
-    if (state.kind === "open") {
-      const key = `${strKey}-0`;
-      if (!allCanonicalKeys.has(key)) return "incorrect";
-    } else if (state.kind === "fret") {
-      const key = `${strKey}-${state.fret}`;
-      if (!allCanonicalKeys.has(key)) return "incorrect";
-    }
+  for (const key of placed) {
+    if (!allKeys.has(key)) return "incorrect";
   }
-
   return "correct";
 }
 
@@ -104,7 +90,6 @@ export function getPlacedIntervalLabel(
   if (!chordNotes.includes(pc)) return "?";
 
   // Semitone distance from root
-  const { Note } = require("tonal");
   const rootMidi = Note.midi(`${chord.root}4`)!;
   const noteMidi = Note.midi(`${pc}4`)!;
   const semitones = ((noteMidi - rootMidi) % 12 + 12) % 12;

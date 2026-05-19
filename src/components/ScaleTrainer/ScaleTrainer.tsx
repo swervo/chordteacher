@@ -6,26 +6,10 @@ import type { ScaleDefinition, StringNumber } from "@/types/chord";
 import Fretboard from "@/components/Fretboard/Fretboard";
 import IntervalStrip from "./IntervalStrip";
 import { noteAtFret } from "@/lib/fretboard";
+import { validateScalePlaced } from "@/lib/validation";
 
 interface ScaleTrainerProps {
   scales: ScaleDefinition[];
-}
-
-function validatePlaced(placed: Set<string>, scale: ScaleDefinition, rootNotes: Set<string>): "correct" | "incomplete" | "incorrect" {
-  const canonical = scale.notes.filter((n) => !rootNotes.has(`${n.string}-${n.fret}`));
-
-  // Every non-root canonical note must be placed
-  for (const note of canonical) {
-    if (!placed.has(`${note.string}-${note.fret}`)) return "incomplete";
-  }
-
-  // No placed note may be outside the full scale
-  const allKeys = new Set(scale.notes.map((n) => `${n.string}-${n.fret}`));
-  for (const key of placed) {
-    if (!allKeys.has(key)) return "incorrect";
-  }
-
-  return "correct";
 }
 
 export default function ScaleTrainer({ scales }: ScaleTrainerProps) {
@@ -69,7 +53,7 @@ export default function ScaleTrainer({ scales }: ScaleTrainerProps) {
         next.add(key);
         audioRef.current?.pluckNote(string, fret).catch(() => {});
       }
-      if (validatePlaced(next, scale, rootNotes) === "correct") {
+      if (validateScalePlaced(next, scale, rootNotes) === "correct") {
         setPhase("correct");
         setTimeout(() => {
           audioRef.current?.playScale(scale.notes, scale.root).catch(() => {});
@@ -85,8 +69,6 @@ export default function ScaleTrainer({ scales }: ScaleTrainerProps) {
     if (rootNotes.has(`${string}-0`)) return;
     handleFretClick(string, 0);
   }, [phase, rootNotes, handleFretClick]);
-
-  const chordShell = { root: scale.root } as import("@/types/chord").ChordDefinition;
 
   return (
     <div className="flex-1 min-h-0 flex flex-col items-center gap-4 w-full max-w-2xl mx-auto px-3">
@@ -111,15 +93,14 @@ export default function ScaleTrainer({ scales }: ScaleTrainerProps) {
         </button>
       </div>
 
-      {phase === "correct" && (
-        <div className="w-full text-center py-2 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold text-sm">
-          Correct!
-        </div>
-      )}
-
-      <div className="flex-1 min-h-0 w-full max-w-sm mx-auto">
+      <div className="flex-1 min-h-0 w-full max-w-sm mx-auto relative">
+        {phase === "correct" && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-xl bg-white/50 dark:bg-gray-900/60 backdrop-blur-sm">
+            <span className="text-5xl">✓</span>
+            <span className="text-2xl font-bold text-green-700 dark:text-green-300">Correct!</span>
+          </div>
+        )}
         <Fretboard
-          chord={chordShell}
           placedNotes={placedNotes}
           onFretClick={handleFretClick}
           onToggleOpenMute={handleToggleOpenMute}
@@ -130,6 +111,7 @@ export default function ScaleTrainer({ scales }: ScaleTrainerProps) {
       </div>
 
       <div className="w-full max-w-sm mx-auto pb-2">
+
         <IntervalStrip scale={scale} />
       </div>
     </div>
