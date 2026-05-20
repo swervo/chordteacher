@@ -44,17 +44,23 @@ export function useQuizState(grade: GradeNumber, mode: Mode, fretboardRef: React
       if (context.validationResult === "correct" && strumChordFn && chord) strumChordFn(chord.fingerings[0]);
       nextButtonRef.current?.focus();
     }
-  }, [snapshot.value, chord]);
+  // snapshot.value and context.validationResult are stable primitives extracted from snapshot
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.value, context.validationResult, chord]);
 
   const handleFretClick = useCallback((string: StringNumber, fret: number) => {
     if (snapshot.matches("success") || snapshot.matches("submitted")) return;
     send({ type: "PLACE_NOTE", string, fret });
     pluckNoteFn?.(string, fret);
+  // snapshot.value is a stable primitive extracted from snapshot
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot.value, send]);
 
   const handleToggleOpenMute = useCallback((string: StringNumber) => {
     if (snapshot.matches("success") || snapshot.matches("submitted")) return;
     send({ type: "TOGGLE_OPEN_MUTE", string, pluck: (s, f) => pluckNoteFn?.(s, f), mute: () => muteSoundFn?.() });
+  // snapshot.value is a stable primitive extracted from snapshot
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot.value, send]);
 
   const handleHear = useCallback(() => {

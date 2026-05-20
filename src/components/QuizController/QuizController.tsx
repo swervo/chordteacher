@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import type { GradeNumber } from "@/types/chord";
 import { strings } from "@/lib/strings";
 import type { Mode } from "@/lib/useMode";
@@ -50,12 +51,12 @@ export default function QuizController({ grade, mode = "practice" }: { grade: Gr
           >
             {strings.quiz.playAgain}
           </button>
-          <a
+          <Link
             href="/"
             className="px-5 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg font-medium transition-colors"
           >
             {strings.quiz.backToGrades}
-          </a>
+          </Link>
         </div>
       </div>
     );

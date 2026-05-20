@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export type Mode = "practice" | "exam";
 
 export function useMode(topic: string = "chords") {
   const key = `mode:${topic}`;
-  const [mode, setMode] = useState<Mode>("practice");
-
-  useEffect(() => {
+  const [mode, setMode] = useState<Mode>(() => {
+    if (typeof window === "undefined") return "practice";
     const stored = localStorage.getItem(key);
-    if (stored === "exam" || stored === "practice") setMode(stored);
-  }, [key]);
+    return stored === "exam" || stored === "practice" ? stored : "practice";
+  });
 
   function toggleMode() {
     const next: Mode = mode === "practice" ? "exam" : "practice";

@@ -2,7 +2,6 @@ import type { ScaleNote, StringFingering, StringNumber } from "@/types/chord";
 import { noteAtFret } from "./fretboard";
 import { Note } from "tonal";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let player: any = null;
 
 async function getPlayer() {
