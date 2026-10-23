@@ -1,0 +1,26 @@
+[
+  {
+    "id": "arpeggio-major",
+    "notes": [
+      {"string": 6, "fret": 1},
+      {"string": 5, "fret": 0},
+      {"string": 5, "fret": 3},
+      {"string": 4, "fret": 3},
+      {"string": 3, "fret": 2},
+      {"string": 2, "fret": 1},
+      {"string": 1, "fret": 1}
+    ]
+  },
+  {
+    "id": "arpeggio-minor",
+    "notes": [
+      {"string": 6, "fret": 1},
+      {"string": 6, "fret": 4},
+      {"string": 5, "fret": 3},
+      {"string": 4, "fret": 3},
+      {"string": 3, "fret": 1},
+      {"string": 2, "fret": 1},
+      {"string": 1, "fret": 1}
+    ]
+  }
+]

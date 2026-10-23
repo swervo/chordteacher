@@ -1,5 +1,7 @@
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import ModeToggle from "@/components/ModeToggle";
+import { strings } from "@/lib/strings";
 
 export default function ArpeggiosHome() {
   return (
@@ -13,10 +15,30 @@ export default function ArpeggiosHome() {
         </div>
 
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mt-4 mb-1">Arpeggios</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-8">Coming soon</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">Select a grade to view arpeggio shapes</p>
 
-        <div className="p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-transparent text-center">
-          <p className="text-gray-400 dark:text-gray-500 text-sm">Arpeggio exercises are under development.</p>
+        <div className="flex justify-center mb-6">
+          <ModeToggle topic="arpeggios" />
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {strings.arpeggioGrades.map(({ grade, label, desc }) => (
+            <Link
+              key={grade}
+              href={`/arpeggios/${grade}`}
+              className="block p-5 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors group border border-gray-200 dark:border-transparent"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-900 dark:text-white font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    {label}
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">{desc}</p>
+                </div>
+                <span className="text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-xl">→</span>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </main>

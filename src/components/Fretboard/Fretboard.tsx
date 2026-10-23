@@ -47,7 +47,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
 ) {
   const isScaleViewerMode = !!scaleNotes;
   const isTrainerMode = placedNotes !== undefined;
-  const isMoveable = isScaleViewerMode && scaleOffset > 0;
+  const isMoveable = (isScaleViewerMode || isTrainerMode) && scaleOffset > 0;
 
   const scaleNoteSet = isScaleViewerMode
     ? new Set(scaleNotes!.map((n) => `${n.string}-${n.fret + scaleOffset}`))
@@ -136,6 +136,14 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
   }
 
   function renderIndicatorTrainer(s: StringNumber, col: number) {
+    // Moveable shape — no open strings, just show label
+    if (isMoveable) {
+      return (
+        <div key={s} role="gridcell" className="flex flex-col items-center">
+          <span className="text-xs font-mono" style={{ color: C.label }}>{STRING_LABELS[s]}</span>
+        </div>
+      );
+    }
     // Root at open string — pre-lit, non-interactive
     if (rootNotes!.has(`${s}-0`)) {
       return (
@@ -232,7 +240,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
     );
   }
 
-  function renderFretTrainer(s: StringNumber, fret: number, col: number) {
+  function renderFretTrainer(s: StringNumber, fret: number, row: number, col: number) {
     // Root note — pre-lit, non-interactive
     if (rootNotes!.has(`${s}-${fret}`)) {
       return (
@@ -252,14 +260,14 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
         <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 pointer-events-none"
           style={{ width: STRING_PX[s], backgroundColor: C.string }} />
         <button
-          ref={(el) => { cellRefs.current[fret][col] = el; }}
-          tabIndex={!disabled && focusedCell?.row === fret && focusedCell?.col === col ? 0 : -1}
+          ref={(el) => { cellRefs.current[row][col] = el; }}
+          tabIndex={!disabled && focusedCell?.row === row && focusedCell?.col === col ? 0 : -1}
           aria-label={`String ${STRING_LABELS[s]}, fret ${fret}`}
           aria-pressed={isPlacedHere}
           className="absolute inset-0 w-full h-full flex items-center justify-center hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70"
           onClick={() => { lastFocusSource.current = "mouse"; onFretClick!(s, fret); }}
-          onFocus={() => setFocusedCell({ row: fret, col })}
-          onKeyDown={(e) => handleKeyDown(e, fret, col)}
+          onFocus={() => setFocusedCell({ row, col })}
+          onKeyDown={(e) => handleKeyDown(e, row, col)}
         >
           {isPlacedHere && (
             <NoteCircle label={noteNameAtFret(s, fret)} bgColor={colorForStringFret(root, s, fret)} />
@@ -269,7 +277,7 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
     );
   }
 
-  function renderFretChordQuiz(s: StringNumber, fret: number, col: number) {
+  function renderFretChordQuiz(s: StringNumber, fret: number, row: number, col: number) {
     const state = stringStates![s];
     const isPlacedHere = state.kind === "fret" && state.fret === fret;
     const isCorrect = isPlacedHere && (validPositions?.has(`${s}-${fret}`) ?? true);
@@ -280,14 +288,14 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
         <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 pointer-events-none"
           style={{ width: STRING_PX[s], backgroundColor: stringColor }} />
         <button
-          ref={(el) => { cellRefs.current[fret][col] = el; }}
-          tabIndex={!disabled && focusedCell?.row === fret && focusedCell?.col === col ? 0 : -1}
+          ref={(el) => { cellRefs.current[row][col] = el; }}
+          tabIndex={!disabled && focusedCell?.row === row && focusedCell?.col === col ? 0 : -1}
           aria-label={`String ${STRING_LABELS[s]}, fret ${fret}`}
           aria-pressed={isPlacedHere}
           className="absolute inset-0 w-full h-full flex items-center justify-center hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70"
           onClick={() => { lastFocusSource.current = "mouse"; onFretClick!(s, fret); }}
-          onFocus={() => setFocusedCell({ row: fret, col })}
-          onKeyDown={(e) => handleKeyDown(e, fret, col)}
+          onFocus={() => setFocusedCell({ row, col })}
+          onKeyDown={(e) => handleKeyDown(e, row, col)}
         >
           {isPlacedHere && (
             <NoteCircle
@@ -344,9 +352,10 @@ const Fretboard = forwardRef<FretboardHandle, FretboardProps>(function Fretboard
                 </div>
               )}
               {STRINGS_LR.map((s, col) => {
+                const row = fi + 1;
                 if (isScaleViewerMode) return renderFretScaleViewer(s, fret);
-                if (isTrainerMode)     return renderFretTrainer(s, fret, col);
-                return renderFretChordQuiz(s, fret, col);
+                if (isTrainerMode)     return renderFretTrainer(s, fret, row, col);
+                return renderFretChordQuiz(s, fret, row, col);
               })}
             </div>
           );

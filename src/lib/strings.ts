@@ -8,7 +8,7 @@ export const strings = {
   topics: [
     { id: "chords", label: "Chords", desc: "Interactive chord quiz with theory feedback" },
     { id: "scales", label: "Scales", desc: "Moveable scale shapes across all grades" },
-    { id: "arpeggios", label: "Arpeggios", desc: "Coming soon" },
+    { id: "arpeggios", label: "Arpeggios", desc: "Moveable arpeggio shapes across grades" },
   ],
   grades: [
     { grade: 1, label: "Grade 1", desc: "A, E, D7, A7, E7, B7" },
@@ -21,6 +21,9 @@ export const strings = {
     { grade: 2, label: "Grade 2", desc: "A Major, A Dorian" },
     { grade: 3, label: "Grade 3", desc: "G Major, A Natural Minor, A Mixolydian" },
     { grade: 4, label: "Grade 4", desc: "E Major, E Natural Minor, E Blues, G, A, C, D Major" },
+  ],
+  arpeggioGrades: [
+    { grade: 3, label: "Grade 3", desc: "E Major, A Major, A Minor" },
   ],
   quiz: {
     instruction: "Play this chord",

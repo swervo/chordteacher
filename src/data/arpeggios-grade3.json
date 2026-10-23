@@ -1,0 +1,38 @@
+[
+  {
+    "id": "e-major-arpeggio-grade3",
+    "name": "E Major",
+    "root": "E",
+    "quality": "major",
+    "grade": 3,
+    "syllabus": "LCM",
+    "notes": [
+      {"string": 6, "fret": 0},
+      {"string": 5, "fret": 2},
+      {"string": 4, "fret": 2},
+      {"string": 3, "fret": 1},
+      {"string": 2, "fret": 0},
+      {"string": 1, "fret": 0}
+    ]
+  },
+  {
+    "id": "a-major-arpeggio-grade3",
+    "name": "A Major",
+    "root": "A",
+    "quality": "major",
+    "grade": 3,
+    "syllabus": "LCM",
+    "derivedFrom": "arpeggio-major",
+    "offset": 4
+  },
+  {
+    "id": "a-minor-arpeggio-grade3",
+    "name": "A Minor",
+    "root": "A",
+    "quality": "minor",
+    "grade": 3,
+    "syllabus": "LCM",
+    "derivedFrom": "arpeggio-minor",
+    "offset": 4
+  }
+]

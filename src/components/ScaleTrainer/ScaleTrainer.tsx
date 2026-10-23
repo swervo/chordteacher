@@ -26,11 +26,13 @@ export default function ScaleTrainer({ scales }: ScaleTrainerProps) {
     });
   }, []);
 
+  const offset = scale.offset ?? 0;
+
   const rootNotes = useMemo(() => new Set(
     scale.notes
-      .filter((n) => Note.pitchClass(noteAtFret(n.string, n.fret)) === scale.root)
-      .map((n) => `${n.string}-${n.fret}`)
-  ), [scale]);
+      .filter((n) => Note.pitchClass(noteAtFret(n.string, n.fret + offset)) === scale.root)
+      .map((n) => `${n.string}-${n.fret + offset}`)
+  ), [scale, offset]);
 
   const goToScale = useCallback((index: number) => {
     setScaleIndex(index);
@@ -53,7 +55,7 @@ export default function ScaleTrainer({ scales }: ScaleTrainerProps) {
         next.add(key);
         audioRef.current?.pluckNote(string, fret).catch(() => {});
       }
-      if (validateScalePlaced(next, scale, rootNotes) === "correct") {
+      if (validateScalePlaced(next, scale, rootNotes, offset) === "correct") {
         setPhase("correct");
         setTimeout(() => {
           audioRef.current?.playScale(scale.notes, scale.root).catch(() => {});
@@ -106,6 +108,7 @@ export default function ScaleTrainer({ scales }: ScaleTrainerProps) {
           onToggleOpenMute={handleToggleOpenMute}
           rootNotes={rootNotes}
           scaleRoot={scale.root}
+          scaleOffset={offset}
           disabled={phase === "correct"}
         />
       </div>

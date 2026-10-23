@@ -67,13 +67,16 @@ export function validateAnswer(
 export function validateScalePlaced(
   placed: Set<string>,
   scale: ScaleDefinition,
-  rootNotes: Set<string>
+  rootNotes: Set<string>,
+  offset: number = 0
 ): ValidationResult {
-  const allKeys = new Set(scale.notes.map((n) => `${n.string}-${n.fret}`));
-  const canonical = scale.notes.filter((n) => !rootNotes.has(`${n.string}-${n.fret}`));
+  const allKeys = new Set(scale.notes.map((n) => `${n.string}-${n.fret + offset}`));
+  const canonical = scale.notes
+    .filter((n) => !rootNotes.has(`${n.string}-${n.fret + offset}`))
+    .map((n) => `${n.string}-${n.fret + offset}`);
 
-  for (const note of canonical) {
-    if (!placed.has(`${note.string}-${note.fret}`)) return "incomplete";
+  for (const key of canonical) {
+    if (!placed.has(key)) return "incomplete";
   }
   for (const key of placed) {
     if (!allKeys.has(key)) return "incorrect";

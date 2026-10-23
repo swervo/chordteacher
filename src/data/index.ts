@@ -8,6 +8,8 @@ import scales1 from "./scales-grade1.json";
 import scales2 from "./scales-grade2.json";
 import scales3 from "./scales-grade3.json";
 import scales4 from "./scales-grade4.json";
+import arpeggioShapes from "./arpeggio-shapes.json";
+import arpeggios3 from "./arpeggios-grade3.json";
 
 // Tab string format: "E-A-D-G-B-e" (string 6 to string 1, low to high)
 // Values: digit = fret number, x = muted
@@ -69,4 +71,25 @@ const ALL_SCALES: ScaleDefinition[] = [
 
 export function getScalesForGrade(grade: GradeNumber): ScaleDefinition[] {
   return ALL_SCALES.filter((s) => s.grade === grade);
+}
+
+const arpeggioShapeMap = new Map<string, ScaleNote[]>(
+  (arpeggioShapes as RawShape[]).map((s) => [s.id, s.notes])
+);
+
+function parseArpeggios(raw: RawScale[]): ScaleDefinition[] {
+  return raw.map(({ derivedFrom, notes, ...rest }) => {
+    const resolvedNotes = derivedFrom
+      ? arpeggioShapeMap.get(derivedFrom) ?? (() => { throw new Error(`arpeggio-shapes.json: unknown shape id "${derivedFrom}"`); })()
+      : notes!;
+    return { ...rest, notes: resolvedNotes };
+  });
+}
+
+const ALL_ARPEGGIOS: ScaleDefinition[] = [
+  ...parseArpeggios(arpeggios3 as RawScale[]),
+];
+
+export function getArpeggiosForGrade(grade: GradeNumber): ScaleDefinition[] {
+  return ALL_ARPEGGIOS.filter((a) => a.grade === grade);
 }
